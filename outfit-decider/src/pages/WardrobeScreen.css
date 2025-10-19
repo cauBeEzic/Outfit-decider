@@ -1,0 +1,54 @@
+/* Wardrobe screen styles */
+.wardrobe-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-md);
+  padding-right: 60px; /* Space for semi-circle */
+}
+
+.wardrobe-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.file-menu {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  z-index: 10;
+}
+
+.wardrobe-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 60px; /* Space for file menu */
+  padding-bottom: var(--spacing-md);
+}
+
+.clothing-section {
+  position: relative;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Semi-circle positioning */
+.semi-circle-right {
+  position: fixed;
+  right: 0;
+  top: 40%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .wardrobe-screen {
+    padding-right: 50px;
+    padding-left: 50px;
+  }
+}

@@ -1,0 +1,157 @@
+/* User photo screen styles */
+.user-photo-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  padding-left: 60px; /* Space for semi-circle */
+}
+
+.semi-circle-left {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.user-photo-content {
+  width: 100%;
+  max-width: 500px;
+}
+
+.screen-title {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  font-size: 28px;
+}
+
+.photo-container {
+  margin-bottom: var(--spacing-lg);
+}
+
+.photo-card {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: var(--spacing-md);
+  position: relative;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.user-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-height: 500px;
+}
+
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #d32f2f;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 10;
+}
+
+.delete-button:hover {
+  transform: scale(1.1);
+}
+
+.photo-placeholder {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.photo-placeholder:hover {
+  background: #f9f9f9;
+}
+
+.placeholder-content {
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.camera-icon {
+  color: var(--color-disabled);
+  margin-bottom: var(--spacing-md);
+}
+
+.placeholder-text {
+  color: var(--color-disabled);
+  font-size: 18px;
+  max-width: 300px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.instruction-text {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-top: var(--spacing-md);
+}
+
+.error-message {
+  text-align: center;
+  color: #d32f2f;
+  padding: var(--spacing-md);
+  background: #ffebee;
+  border-radius: 4px;
+  margin-top: var(--spacing-md);
+}
+
+.uploading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  color: white;
+}
+
+.uploading-overlay p {
+  margin-top: var(--spacing-md);
+  font-size: 18px;
+}
+
+@media (max-width: 480px) {
+  .user-photo-screen {
+    padding-left: 50px;
+  }
+
+  .photo-card {
+    min-height: 350px;
+  }
+
+  .screen-title {
+    font-size: 24px;
+  }
+}

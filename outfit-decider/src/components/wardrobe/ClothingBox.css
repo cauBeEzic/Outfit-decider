@@ -1,0 +1,40 @@
+/* Clothing box styles */
+.clothing-box {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.clothing-card {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: var(--spacing-md);
+}
+
+.clothing-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.clothing-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--color-disabled);
+  text-align: center;
+  font-size: 18px;
+}
+
+/* Responsive sizing */
+@media (max-width: 480px) {
+  .clothing-card {
+    height: 250px;
+  }
+}

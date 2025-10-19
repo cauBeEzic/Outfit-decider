@@ -1,0 +1,24 @@
+/* Semi-circle navigation styles */
+.semi-circle-nav {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s;
+}
+
+.semi-circle-nav:hover {
+  transform: scale(1.05);
+}
+
+.semi-circle-nav svg {
+  color: var(--color-text);
+}
+
+.semi-circle-right {
+  /* Positioned by parent component */
+}
+
+.semi-circle-left {
+  /* Positioned by parent component */
+}

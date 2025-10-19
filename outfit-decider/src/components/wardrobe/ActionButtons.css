@@ -1,0 +1,29 @@
+/* Action buttons grid styles */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  max-width: 400px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) 0;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.action-btn {
+  width: 100%;
+  min-height: 60px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .action-btn {
+    min-height: 55px;
+    font-size: 15px;
+  }
+}
