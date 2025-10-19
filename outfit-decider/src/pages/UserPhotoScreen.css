@@ -7,12 +7,14 @@
   justify-content: center;
   padding: var(--spacing-lg);
   padding-left: 60px; /* Space for semi-circle */
+  padding-right: 50px;
+  padding-bottom: 100px;
 }
 
 .semi-circle-left {
   position: fixed;
   left: 0;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
   z-index: 5;
 }
@@ -56,6 +58,13 @@
   max-height: 500px;
 }
 
+.delete-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 9;
+}
+
 .delete-button {
   position: absolute;
   top: 10px;
@@ -79,7 +88,7 @@
 
 .photo-placeholder {
   width: 100%;
-  min-height: 400px;
+  min-height: 450px;
   display: flex;
   align-items: center;
   justify-content: center;

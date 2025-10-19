@@ -45,6 +45,7 @@ const UserPhotoScreen: React.FC = () => {
     if (!file || !user) return;
 
     setError('');
+    setShowDeleteButton(false); // Hide delete button during upload
 
     // Validate file
     const validation = validateImageFile(file);
@@ -55,10 +56,6 @@ const UserPhotoScreen: React.FC = () => {
 
     try {
       setUploading(true);
-
-      // Create preview
-      const preview = await createImagePreview(file);
-      setPreviewUrl(preview);
 
       // Compress image
       const compressedFile = await compressImage(file);
@@ -78,12 +75,14 @@ const UserPhotoScreen: React.FC = () => {
         .upload(filePath, compressedFile, {
           upsert: true,
           contentType: compressedFile.type,
+          cacheControl: '0', // Prevent caching old image
         });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const publicUrl = getPublicUrl(STORAGE_BUCKETS.USER_PHOTOS, filePath);
+      // Get public URL with cache busting
+      const timestamp = new Date().getTime();
+      const publicUrl = `${getPublicUrl(STORAGE_BUCKETS.USER_PHOTOS, filePath)}?t=${timestamp}`;
 
       // Save to database
       const { error: dbError } = await supabase
@@ -124,16 +123,18 @@ const UserPhotoScreen: React.FC = () => {
       clearTimeout(clickTimeoutRef.current);
     }
 
-    clickTimeoutRef.current = setTimeout(() => {
-      setClickCount(0);
-      setShowDeleteButton(false);
-    }, 500);
-
     // Show delete button on second click
     if (clickCount === 1) {
       setShowDeleteButton(true);
       setClickCount(0);
+      // Don't auto-hide, let user manually close or delete
+      return;
     }
+
+    // Reset after 500ms if only single click
+    clickTimeoutRef.current = setTimeout(() => {
+      setClickCount(0);
+    }, 500);
   };
 
   const handleDelete = async () => {
@@ -192,19 +193,29 @@ const UserPhotoScreen: React.FC = () => {
                 <img src={previewUrl} alt="User photo" className="user-photo" />
                 
                 {showDeleteButton && (
-                  <button
-                    className="delete-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete();
-                    }}
-                    aria-label="Delete photo"
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
+                  <>
+                    {/* Overlay to close delete button */}
+                    <div 
+                      className="delete-overlay"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDeleteButton(false);
+                      }}
+                    />
+                    <button
+                      className="delete-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete();
+                      }}
+                      aria-label="Delete photo"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </>
                 )}
               </div>
             ) : (

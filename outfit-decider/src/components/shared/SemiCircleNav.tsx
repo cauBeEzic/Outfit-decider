@@ -38,7 +38,7 @@ const SemiCircleNav: React.FC<SemiCircleNavProps> = ({
         ) : (
           <>
             {/* Semi-circle with vertical line on right */}
-            <path d="M 40 0 L 40 80" />
+            {/* <path d="M 40 0 L 40 80" /> */}
             <path d="M 40 40 A 30 30 0 0 0 10 10 L 10 70 A 30 30 0 0 0 40 40" fill="white" />
             {/* Arrow pointing left */}
             <polyline points="25 30 15 40 25 50" strokeWidth="3" />
