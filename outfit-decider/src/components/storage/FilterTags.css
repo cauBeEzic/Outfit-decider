@@ -1,0 +1,42 @@
+/* Filter tags styles */
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.filter-tag {
+  padding: 8px 16px;
+  border: 2px solid var(--color-border);
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-tag:hover {
+  background: #f5f5f5;
+  transform: translateY(-1px);
+}
+
+.filter-tag.selected {
+  background: var(--color-text);
+  color: white;
+  border-color: var(--color-text);
+}
+
+.check-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .filter-tag {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}

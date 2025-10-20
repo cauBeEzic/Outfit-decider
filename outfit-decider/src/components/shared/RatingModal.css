@@ -1,0 +1,105 @@
+/* Rating modal styles */
+.rating-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: var(--spacing-lg);
+}
+
+.rating-modal {
+  width: 100%;
+  max-width: 400px;
+}
+
+.rating-modal wired-card {
+  background: white;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.modal-title {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 24px;
+}
+
+.modal-description {
+  margin: 0 0 var(--spacing-xl) 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.stars-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+}
+
+.star-button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s;
+}
+
+.star-button:hover {
+  transform: scale(1.15);
+}
+
+.star-button.active {
+  transform: scale(1.1);
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.modal-button {
+  width: 100%;
+  min-height: 50px;
+}
+
+.cancel-link {
+  border: none;
+  background: none;
+  color: #666;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  padding: var(--spacing-sm);
+}
+
+.cancel-link:hover {
+  color: var(--color-text);
+}
+
+@media (max-width: 480px) {
+  .rating-modal-overlay {
+    padding: var(--spacing-md);
+  }
+
+  .rating-modal wired-card {
+    padding: var(--spacing-lg);
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+
+  .stars-container {
+    gap: 4px;
+  }
+
+  .star-button svg {
+    width: 40px;
+    height: 40px;
+  }
+}

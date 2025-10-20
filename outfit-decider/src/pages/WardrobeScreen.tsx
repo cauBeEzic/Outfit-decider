@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ClothingBox from '@/components/wardrobe/ClothingBox';
-import NavigationArrows from '@/components/wardrobe/NavigationArrows.tsx';
+import NavigationArrows from '@/components/wardrobe/NavigationArrows';
 import ActionButtons from '@/components/wardrobe/ActionButton';
-import FileMenu from '@/components/wardrobe/FileMenu.tsx';
+import FileMenu from '@/components/wardrobe/FileMenu';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
+import RatingModal from '@/components/shared/RatingModal';
 import { ClothingItem } from '@/types';
 import { supabase } from '@/lib/supabase';
 import './WardrobeScreen.css';
@@ -28,6 +29,9 @@ const WardrobeScreen: React.FC = () => {
   // Loading states
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  
+  // Modal state
+  const [showRatingModal, setShowRatingModal] = useState(false);
 
   // Load user's wardrobe on mount
   useEffect(() => {
@@ -172,8 +176,48 @@ const WardrobeScreen: React.FC = () => {
   };
 
   const handleSaveRating = () => {
-    // TODO: Implement save/rating modal
-    alert('Save/Rating feature coming soon!');
+    // Show rating modal
+    setShowRatingModal(true);
+  };
+
+  const handleSaveOutfit = async (rating: number | null) => {
+    if (!user) return;
+
+    try {
+      const currentTop = tops[currentTopIndex];
+      const currentBottom = bottoms[currentBottomIndex];
+
+      // Save outfit to database
+      const { data: outfitData, error: outfitError } = await supabase
+        .from('saved_outfits')
+        .insert({
+          user_id: user.id,
+          top_id: currentTop?.id || null,
+          bottom_id: currentBottom?.id || null,
+          rating: rating,
+        })
+        .select()
+        .single();
+
+      if (outfitError) throw outfitError;
+
+      // If there's a generated image, save it
+      if (generatedImageUrl && outfitData) {
+        await supabase
+          .from('generated_photos')
+          .insert({
+            user_id: user.id,
+            outfit_id: outfitData.id,
+            image_url: generatedImageUrl,
+          });
+      }
+
+      setShowRatingModal(false);
+      alert('Outfit saved successfully!');
+    } catch (error) {
+      console.error('Error saving outfit:', error);
+      alert('Failed to save outfit');
+    }
   };
 
   const currentTop = tops[currentTopIndex];
@@ -251,6 +295,14 @@ const WardrobeScreen: React.FC = () => {
         onClick={() => navigate('/user-photo')}
         className="semi-circle-right"
       />
+
+      {/* Rating modal */}
+      {showRatingModal && (
+        <RatingModal
+          onSave={handleSaveOutfit}
+          onCancel={() => setShowRatingModal(false)}
+        />
+      )}
     </div>
   );
 };
