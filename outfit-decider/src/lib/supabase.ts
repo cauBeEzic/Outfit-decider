@@ -11,11 +11,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Helper functions for storage paths
+const PHOTO_EXTENSIONS = ['jpg', 'png'] as const;
+type PhotoExtension = (typeof PHOTO_EXTENSIONS)[number];
+
 export const getStoragePath = {
   clothingItem: (userId: string, itemId: string) => `${userId}/${itemId}.jpg`,
-  userPhoto: (userId: string) => `${userId}/photo.jpg`,
-  generatedPhoto: (userId: string, photoId: string) => `${userId}/${photoId}.jpg`,
+  userPhoto: (userId: string, extension: PhotoExtension = 'jpg') => `${userId}/photo.${extension}`,
+  generatedPhoto: (userId: string, photoId: string, extension: PhotoExtension = 'jpg') =>
+    `${userId}/${photoId}.${extension}`,
 };
+
+export const getAllUserPhotoPaths = (userId: string): string[] =>
+  PHOTO_EXTENSIONS.map((ext) => getStoragePath.userPhoto(userId, ext));
 
 // Helper to get public URL from storage
 export const getPublicUrl = (bucket: string, path: string): string => {

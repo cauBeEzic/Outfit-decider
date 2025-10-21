@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNanoBanana } from '@/hooks/useNanoBanana';
 import ClothingBox from '@/components/wardrobe/ClothingBox';
 import NavigationArrows from '@/components/wardrobe/NavigationArrows';
 import ActionButtons from '@/components/wardrobe/ActionButton';
@@ -15,6 +16,7 @@ import './WardrobeScreen.css';
 const WardrobeScreen: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { generateTryOn, generating: nanoBanaGenerating, error: nanoBanaError } = useNanoBanana(user?.id);
 
   // State for clothing items
   const [tops, setTops] = useState<ClothingItem[]>([]);
@@ -33,10 +35,20 @@ const WardrobeScreen: React.FC = () => {
   // Modal state
   const [showRatingModal, setShowRatingModal] = useState(false);
 
+  // Combine loading states
+  const isGenerating = generating || nanoBanaGenerating;
+
   // Load user's wardrobe on mount
   useEffect(() => {
     loadWardrobe();
     loadUserPhoto();
+
+    if (typeof window !== 'undefined') {
+      const storedGenerated = sessionStorage.getItem('lastGeneratedImageUrl');
+      if (storedGenerated) {
+        setGeneratedImageUrl(storedGenerated);
+      }
+    }
   }, [user]);
 
   const loadWardrobe = async () => {
@@ -113,12 +125,15 @@ const WardrobeScreen: React.FC = () => {
 
     await supabase
       .from('user_preferences')
-      .upsert({
-        user_id: user.id,
-        last_viewed_top_id: currentTop?.id || null,
-        last_viewed_bottom_id: currentBottom?.id || null,
-        updated_at: new Date().toISOString(),
-      });
+      .upsert(
+        {
+          user_id: user.id,
+          last_viewed_top_id: currentTop?.id || null,
+          last_viewed_bottom_id: currentBottom?.id || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      );
   };
 
   // Navigation handlers
@@ -166,13 +181,46 @@ const WardrobeScreen: React.FC = () => {
     alert('Describe feature coming soon!');
   };
 
-  const handleGenerate = () => {
-    // TODO: Implement Nano Banana generation
+  const handleGenerate = async () => {
+    if (!userPhotoUrl) {
+      alert('Please upload your photo first!');
+      return;
+    }
+
+    const currentTop = tops[currentTopIndex];
+    const currentBottom = bottoms[currentBottomIndex];
+
+    if (!currentTop && !currentBottom) {
+      alert('Please select at least one clothing item!');
+      return;
+    }
+
     setGenerating(true);
-    setTimeout(() => {
-      alert('Generate feature coming soon!');
+
+    try {
+      const result = await generateTryOn(
+        userPhotoUrl,
+        currentTop?.image_url,
+        currentBottom?.image_url
+      );
+
+      if (result?.url) {
+        setGeneratedImageUrl(result.url);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('lastGeneratedImageUrl', result.url);
+        }
+        if (result.persisted) {
+          setUserPhotoUrl(result.url);
+        }
+      } else if (nanoBanaError) {
+        alert(`Generation failed: ${nanoBanaError}`);
+      }
+    } catch (error: any) {
+      console.error('Generate error:', error);
+      alert('Failed to generate try-on image');
+    } finally {
       setGenerating(false);
-    }, 1000);
+    }
   };
 
   const handleSaveRating = () => {
@@ -255,7 +303,6 @@ const WardrobeScreen: React.FC = () => {
             item={currentTop}
             type="top"
             placeholderText="Upload your top"
-            generatedImageUrl={generatedImageUrl}
           />
         </div>
 
@@ -271,9 +318,14 @@ const WardrobeScreen: React.FC = () => {
             item={currentBottom}
             type="bottom"
             placeholderText="Upload your bottom"
-            generatedImageUrl={null}
           />
         </div>
+
+        {nanoBanaError && (
+          <p className="wardrobe-error" role="alert">
+            {nanoBanaError}
+          </p>
+        )}
 
         {/* Action buttons - 2x2 grid */}
         <ActionButtons
@@ -285,7 +337,7 @@ const WardrobeScreen: React.FC = () => {
           describeDisabled={!hasBothTypes}
           generateDisabled={!canGenerate}
           saveRatingDisabled={!generatedImageUrl}
-          generating={generating}
+          generating={isGenerating}
         />
       </div>
 

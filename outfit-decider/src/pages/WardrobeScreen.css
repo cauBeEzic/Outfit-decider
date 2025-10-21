@@ -26,7 +26,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: var(--spacing-lg);
   padding-top: 60px; /* Space for file menu */
   padding-bottom: var(--spacing-md);
 }
@@ -34,6 +34,12 @@
 .clothing-section {
   position: relative;
   margin-bottom: var(--spacing-lg);
+}
+
+.wardrobe-error {
+  color: #d32f2f;
+  font-size: 14px;
+  text-align: center;
 }
 
 /* Semi-circle positioning */

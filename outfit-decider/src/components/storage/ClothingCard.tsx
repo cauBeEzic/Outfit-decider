@@ -1,7 +1,7 @@
 // Polaroid-style clothing card component
 import React, { useState } from 'react';
 import { ClothingItem } from '@/types';
-import { supabase, getStoragePath } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { STORAGE_BUCKETS } from '@/utils/constants';
 import './ClothingCard.css';
 

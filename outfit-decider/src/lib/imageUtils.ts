@@ -4,7 +4,8 @@ import { IMAGE_LIMITS } from '@/utils/constants';
 
 export const validateImageFile = (file: File): { valid: boolean; error?: string } => {
   // Check file type
-  if (!IMAGE_LIMITS.ALLOWED_TYPES.includes(file.type)) {
+  const allowedTypes = IMAGE_LIMITS.ALLOWED_TYPES as readonly string[];
+  if (!allowedTypes.includes(file.type)) {
     return {
       valid: false,
       error: 'Only JPEG and PNG images are allowed',

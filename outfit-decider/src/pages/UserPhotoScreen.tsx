@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
-import { supabase, getStoragePath, getPublicUrl } from '@/lib/supabase';
-import { validateImageFile, compressImage, createImagePreview } from '@/lib/imageUtils';
+import { supabase, getStoragePath, getPublicUrl, getAllUserPhotoPaths } from '@/lib/supabase';
+import { validateImageFile, compressImage } from '@/lib/imageUtils';
 import { STORAGE_BUCKETS } from '@/utils/constants';
 import './UserPhotoScreen.css';
 
@@ -37,6 +37,8 @@ const UserPhotoScreen: React.FC = () => {
     if (data?.image_url) {
       setPhotoUrl(data.image_url);
       setPreviewUrl(data.image_url);
+    } else if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('lastGeneratedImageUrl');
     }
   };
 
@@ -60,15 +62,16 @@ const UserPhotoScreen: React.FC = () => {
       // Compress image
       const compressedFile = await compressImage(file);
 
-      // Upload to Supabase Storage
-      const filePath = getStoragePath.userPhoto(user.id);
-      
-      // Delete old photo if exists
-      if (photoUrl) {
-        await supabase.storage
-          .from(STORAGE_BUCKETS.USER_PHOTOS)
-          .remove([filePath]);
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('lastGeneratedImageUrl');
       }
+
+      const extension = compressedFile.type === 'image/png' ? 'png' : 'jpg';
+      const filePath = getStoragePath.userPhoto(user.id, extension);
+
+      await supabase.storage
+        .from(STORAGE_BUCKETS.USER_PHOTOS)
+        .remove(getAllUserPhotoPaths(user.id));
 
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKETS.USER_PHOTOS)
@@ -87,11 +90,14 @@ const UserPhotoScreen: React.FC = () => {
       // Save to database
       const { error: dbError } = await supabase
         .from('user_photos')
-        .upsert({
-          user_id: user.id,
-          image_url: publicUrl,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(
+          {
+            user_id: user.id,
+            image_url: publicUrl,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
 
       if (dbError) throw dbError;
 
@@ -144,10 +150,10 @@ const UserPhotoScreen: React.FC = () => {
       setUploading(true);
 
       // Delete from storage
-      const filePath = getStoragePath.userPhoto(user.id);
+      const pathsToRemove = getAllUserPhotoPaths(user.id);
       await supabase.storage
         .from(STORAGE_BUCKETS.USER_PHOTOS)
-        .remove([filePath]);
+        .remove(pathsToRemove);
 
       // Delete from database
       await supabase
@@ -158,6 +164,9 @@ const UserPhotoScreen: React.FC = () => {
       setPhotoUrl(null);
       setPreviewUrl(null);
       setShowDeleteButton(false);
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('lastGeneratedImageUrl');
+      }
     } catch (err: any) {
       console.error('Delete error:', err);
       setError(err.message || 'Failed to delete photo');

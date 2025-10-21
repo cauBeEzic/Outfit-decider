@@ -147,26 +147,30 @@ const UploadScreen: React.FC = () => {
         </div>
 
         <div className="upload-container">
-          <wired-card elevation="3" className="upload-card">
-            {previewUrl ? (
-              <img src={previewUrl} alt="Preview" className="preview-image" />
-            ) : (
-              <div className="camera-placeholder" onClick={handleCameraClick}>
-                <svg 
-                  width="80" 
-                  height="80" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  className="camera-icon"
-                >
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
+          <div className="upload-frame">
+            <wired-card elevation="3" className="upload-card">
+              <div className="upload-card-content">
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Preview" className="preview-image" />
+                ) : (
+                  <div className="camera-placeholder" onClick={handleCameraClick}>
+                    <svg 
+                      width="80" 
+                      height="80" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                      className="camera-icon"
+                    >
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                  </div>
+                )}
               </div>
-            )}
-          </wired-card>
+            </wired-card>
+          </div>
 
           {/* Tag section - always rendered to maintain consistent spacing */}
           <div className="tag-section">

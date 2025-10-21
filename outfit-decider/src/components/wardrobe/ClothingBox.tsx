@@ -7,17 +7,14 @@ interface ClothingBoxProps {
   item?: ClothingItem;
   type: ClothingType;
   placeholderText: string;
-  generatedImageUrl?: string | null;
 }
 
 const ClothingBox: React.FC<ClothingBoxProps> = ({
   item,
   type,
   placeholderText,
-  generatedImageUrl,
 }) => {
-  // Show generated image if available, otherwise show item or placeholder
-  const displayImageUrl = generatedImageUrl || item?.image_url;
+  const displayImageUrl = item?.image_url;
 
   return (
     <div className="clothing-box">
