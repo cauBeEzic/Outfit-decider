@@ -15,10 +15,30 @@
   max-width: 400px;
 }
 
-.rating-modal wired-card {
-  background: white;
+.rating-window-body {
   padding: var(--spacing-xl);
   text-align: center;
+}
+
+.title-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 4px;
+}
+
+.title-bar-close {
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.title-bar-close:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-title {
@@ -75,6 +95,7 @@
   cursor: pointer;
   font-size: 14px;
   padding: var(--spacing-sm);
+  background: none;
 }
 
 .cancel-link:hover {
@@ -86,7 +107,7 @@
     padding: var(--spacing-md);
   }
 
-  .rating-modal wired-card {
+  .rating-window-body {
     padding: var(--spacing-lg);
   }
 

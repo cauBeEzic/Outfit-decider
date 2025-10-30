@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import WiredButton from '@/components/shared/WiredButton';
 import ClothingCard from '@/components/storage/ClothingCard';
 import FilterTags from '@/components/storage/FilterTags';
 import { supabase } from '@/lib/supabase';
@@ -89,9 +88,13 @@ const StorageScreen: React.FC = () => {
       <div className="storage-content">
         <div className="storage-header">
           <h1 className="screen-title">Storage</h1>
-          <WiredButton onClick={() => navigate('/')}>
+          <button
+            type="button"
+            className="button"
+            onClick={() => navigate('/')}
+          >
             Back
-          </WiredButton>
+          </button>
         </div>
 
         {/* Filter section */}
@@ -121,9 +124,13 @@ const StorageScreen: React.FC = () => {
           <div className="empty-state">
             <p>{items.length === 0 ? PLACEHOLDER_MESSAGES.NO_ITEMS : 'No items match the selected filters'}</p>
             {items.length === 0 && (
-              <WiredButton onClick={() => navigate('/upload/top')}>
+              <button
+                type="button"
+                className="button"
+                onClick={() => navigate('/upload/top')}
+              >
                 Upload First Item
-              </WiredButton>
+              </button>
             )}
           </div>
         ) : (

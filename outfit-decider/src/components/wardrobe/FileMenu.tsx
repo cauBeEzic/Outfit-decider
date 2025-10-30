@@ -33,7 +33,7 @@ const FileMenu: React.FC<FileMenuProps> = ({ className = '' }) => {
         <>
           <div className="menu-overlay" onClick={() => setIsOpen(false)} />
           <div className="file-menu-dropdown">
-            <wired-card elevation="3">
+            <div className="xp-menu-window">
               <button
                 className="menu-item"
                 onClick={() => handleMenuClick('/upload/top')}
@@ -58,7 +58,7 @@ const FileMenu: React.FC<FileMenuProps> = ({ className = '' }) => {
               >
                 Saved Outfits
               </button>
-            </wired-card>
+            </div>
           </div>
         </>
       )}

@@ -1,6 +1,5 @@
 // Rating modal for saving outfits
 import React, { useState } from 'react';
-import WiredButton from './WiredButton';
 import './RatingModal.css';
 
 interface RatingModalProps {
@@ -36,8 +35,21 @@ const RatingModal: React.FC<RatingModalProps> = ({ onSave, onCancel }) => {
 
   return (
     <div className="rating-modal-overlay">
-      <div className="rating-modal">
-        <wired-card elevation="3">
+      <div className="rating-modal window" role="dialog" aria-modal="true">
+        <div className="title-bar">
+          <div className="title-bar-text">Save Outfit</div>
+          <div className="title-bar-controls">
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onCancel}
+              className="title-bar-close"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+        <div className="window-body rating-window-body">
           <h2 className="modal-title">Save Outfit</h2>
           <p className="modal-description">
             Rate this outfit (optional)
@@ -52,6 +64,7 @@ const RatingModal: React.FC<RatingModalProps> = ({ onSave, onCancel }) => {
                 onMouseEnter={() => handleStarHover(star)}
                 onMouseLeave={handleStarLeave}
                 aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                type="button"
               >
                 <svg
                   width="48"
@@ -68,18 +81,26 @@ const RatingModal: React.FC<RatingModalProps> = ({ onSave, onCancel }) => {
           </div>
 
           <div className="modal-actions">
-            <WiredButton onClick={handleSkip} className="modal-button">
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="button modal-button"
+            >
               Skip
-            </WiredButton>
-            <WiredButton onClick={handleSave} className="modal-button">
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="button modal-button"
+            >
               Save
-            </WiredButton>
+            </button>
           </div>
 
-          <button onClick={onCancel} className="cancel-link">
+          <button onClick={onCancel} className="cancel-link" type="button">
             Cancel
           </button>
-        </wired-card>
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,7 @@
-/// <reference path="../types/wired-elements.d.ts" />
-// Authentication screen - Sign in / Sign up
+// Authentication screen styled with XP.css window pattern
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import WiredButton from '@/components/shared/WiredButton';
-
+import './AuthScreen.css';
 
 const AuthScreen: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,7 +12,7 @@ const AuthScreen: React.FC = () => {
 
   const { signIn, signUp } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -33,84 +31,71 @@ const AuthScreen: React.FC = () => {
   };
 
   return (
-    <div className="container" style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center' 
-    }}>
-      <wired-card elevation="3" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
-        <h1 style={{ marginBottom: '24px', textAlign: 'center' }}>
-          {isSignUp ? 'Create Account' : 'Welcome Back'}
-        </h1>
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '16px' }}>
-            <label htmlFor="email" style={{ display: 'block', marginBottom: '8px' }}>
-              Email
-            </label>
-            <wired-input
-              id="email"
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onInput={(e: any) => setEmail(e.target.value)}
-              required
-              style={{ width: '100%' }}
-            />
+    <div className="auth-screen">
+      <div className="window auth-window">
+        <div className="title-bar">
+          <div className="title-bar-text">
+            {isSignUp ? 'Create Account' : 'Welcome Back'}
           </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <label htmlFor="password" style={{ display: 'block', marginBottom: '8px' }}>
-              Password
-            </label>
-            <wired-input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onInput={(e: any) => setPassword(e.target.value)}
-              required
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          {error && (
-            <div style={{ 
-              color: '#d32f2f', 
-              marginBottom: '16px', 
-              fontSize: '14px' 
-            }}>
-              {error}
+        </div>
+        <div className="window-body auth-window-body">
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="auth-field">
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                className="text-input"
+                placeholder="you@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
             </div>
-          )}
 
-          <WiredButton
-            type="submit"
-            disabled={loading}
-            className="auth-submit-button full-width margin-bottom"
-          >
-            {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
-          </WiredButton>
+            <div className="auth-field">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                className="text-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
+              />
+            </div>
 
-          <div style={{ textAlign: 'center' }}>
+            {error && (
+              <div className="auth-error" role="alert">
+                {error}
+              </div>
+            )}
+
             <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#666',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}
+              type="submit"
+              className="button auth-submit-button"
+              disabled={loading}
             >
-              {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
+              {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
             </button>
-          </div>
-        </form>
-      </wired-card>
+
+            <div className="auth-toggle">
+              <button
+                type="button"
+                className="auth-toggle-button"
+                onClick={() => setIsSignUp(!isSignUp)}
+              >
+                {isSignUp
+                  ? 'Already have an account? Sign in'
+                  : 'Need an account? Sign up'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

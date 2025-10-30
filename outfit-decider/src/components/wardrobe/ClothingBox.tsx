@@ -18,19 +18,21 @@ const ClothingBox: React.FC<ClothingBoxProps> = ({
 
   return (
     <div className="clothing-box">
-      <wired-card elevation="2" className="clothing-card">
-        {displayImageUrl ? (
-          <img
-            src={displayImageUrl}
-            alt={`${type} clothing item`}
-            className="clothing-image"
-          />
-        ) : (
-          <div className="clothing-placeholder">
-            <p>{placeholderText}</p>
-          </div>
-        )}
-      </wired-card>
+      <div className="xp-window clothing-card">
+        <div className="xp-window-body">
+          {displayImageUrl ? (
+            <img
+              src={displayImageUrl}
+              alt={`${type} clothing item`}
+              className="clothing-image"
+            />
+          ) : (
+            <div className="clothing-placeholder">
+              <p>{placeholderText}</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

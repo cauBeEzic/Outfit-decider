@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
-import WiredButton from '@/components/shared/WiredButton';
 import RatingModal from '@/components/shared/RatingModal';
 import { supabase, getStoragePath, getPublicUrl, getAllUserPhotoPaths } from '@/lib/supabase';
 import { validateImageFile, compressImage } from '@/lib/imageUtils';
@@ -451,63 +450,69 @@ const UserPhotoScreen: React.FC = () => {
         <h1 className="screen-title">Your Photo</h1>
         
         <div className="photo-container">
-          <wired-card elevation="3" className="photo-card">
-            {previewUrl ? (
-              <div 
-                className="photo-preview"
-                onClick={handlePhotoClick}
-                style={{ cursor: 'pointer' }}
-              >
-                <img src={previewUrl} alt="User photo" className="user-photo" />
-                
-                {showDeleteButton && (
-                  <>
-                    {/* Overlay to close delete button */}
-                    <div 
-                      className="delete-overlay"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDeleteButton(false);
-                      }}
-                    />
-                    <button
-                      className="delete-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete();
-                      }}
-                      aria-label="Delete photo"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="photo-placeholder" onClick={handleUploadClick}>
-                <div className="placeholder-content">
-                  <svg 
-                    width="64" 
-                    height="64" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                    className="camera-icon"
-                  >
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                  </svg>
-                  <p className="placeholder-text">
-                    Add a photo of yourself standing straight
-                  </p>
+          <div className="window photo-window">
+            <div className="title-bar">
+              <div className="title-bar-text">Photo Preview</div>
+            </div>
+            <div className="window-body photo-window-body">
+              {previewUrl ? (
+                <div 
+                  className="photo-preview"
+                  onClick={handlePhotoClick}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img src={previewUrl} alt="User photo" className="user-photo" />
+                  
+                  {showDeleteButton && (
+                    <>
+                      {/* Overlay to close delete button */}
+                      <div 
+                        className="delete-overlay"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteButton(false);
+                        }}
+                      />
+                      <button
+                        className="delete-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete();
+                        }}
+                        aria-label="Delete photo"
+                        type="button"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                      </button>
+                    </>
+                  )}
                 </div>
-              </div>
-            )}
-          </wired-card>
+              ) : (
+                <div className="photo-placeholder" onClick={handleUploadClick}>
+                  <div className="placeholder-content">
+                    <svg 
+                      width="64" 
+                      height="64" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                      className="camera-icon"
+                    >
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <p className="placeholder-text">
+                      Add a photo of yourself standing straight
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           <p className="instruction-text">
             {photoUrl 
@@ -518,25 +523,27 @@ const UserPhotoScreen: React.FC = () => {
 
           <div className="photo-actions">
             <div className="photo-action-slot">
-              <WiredButton
+              <button
+                type="button"
                 onClick={handleSaveRatingClick}
                 disabled={!hasGeneratedTryOn || uploading}
-                className="photo-action-button save-rating-button"
+                className="button photo-action-button save-rating-button"
                 title={!hasGeneratedTryOn ? 'Generate an outfit before saving' : undefined}
               >
                 Save / Rating
-              </WiredButton>
+              </button>
             </div>
 
             <div className="photo-action-slot">
-              <WiredButton
+              <button
+                type="button"
                 onClick={handleResetGenerated}
                 disabled={!hasGeneratedTryOn || !hasOriginalBackup || uploading}
-                className="photo-action-button reset-button"
+                className="button photo-action-button reset-button"
                 title={!hasGeneratedTryOn ? 'No generated outfit to reset' : undefined}
               >
                 Reset Photo    
-              </WiredButton>
+              </button>
             </div>
           </div>
         </div>

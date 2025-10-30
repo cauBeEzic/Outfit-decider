@@ -1,6 +1,5 @@
-// Tag input modal component
+// XP.css tag input modal component
 import React, { useState } from 'react';
-import WiredButton from '@/components/shared/WiredButton';
 import './TagInput.css';
 
 interface TagInputProps {
@@ -15,10 +14,8 @@ const TagInput: React.FC<TagInputProps> = ({ existingTags, onSave, onCancel }) =
 
   const handleAddTag = () => {
     const trimmedTag = inputValue.trim().toLowerCase();
-    
     if (!trimmedTag) return;
-    
-    // Don't add duplicates
+
     if (tags.includes(trimmedTag)) {
       setInputValue('');
       return;
@@ -29,10 +26,10 @@ const TagInput: React.FC<TagInputProps> = ({ existingTags, onSave, onCancel }) =
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddTag();
@@ -45,8 +42,21 @@ const TagInput: React.FC<TagInputProps> = ({ existingTags, onSave, onCancel }) =
 
   return (
     <div className="tag-input-overlay">
-      <div className="tag-input-modal">
-        <wired-card elevation="3">
+      <div className="tag-input-modal window" role="dialog" aria-modal="true">
+        <div className="title-bar">
+          <div className="title-bar-text">Add Tags</div>
+          <div className="title-bar-controls">
+            <button
+              type="button"
+              aria-label="Close"
+              className="title-bar-close"
+              onClick={onCancel}
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+        <div className="window-body tag-window-body">
           <h2 className="modal-title">Add Tags</h2>
           <p className="modal-description">
             Add tags to help organize and find this item later
@@ -59,30 +69,31 @@ const TagInput: React.FC<TagInputProps> = ({ existingTags, onSave, onCancel }) =
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type a tag and press Enter"
-              className="tag-text-input"
+              className="text-input tag-text-input"
               autoFocus
             />
             <button
+              type="button"
               onClick={handleAddTag}
-              className="add-tag-button"
+              className="button add-tag-button"
               disabled={!inputValue.trim()}
             >
               Add
             </button>
           </div>
 
-          {/* Display current tags */}
           {tags.length > 0 && (
             <div className="current-tags">
               {tags.map((tag, index) => (
                 <div key={index} className="tag-item">
                   <span>{tag}</span>
                   <button
+                    type="button"
                     onClick={() => handleRemoveTag(tag)}
                     className="remove-tag-button"
                     aria-label={`Remove ${tag}`}
                   >
-                    ×
+                    &times;
                   </button>
                 </div>
               ))}
@@ -90,14 +101,22 @@ const TagInput: React.FC<TagInputProps> = ({ existingTags, onSave, onCancel }) =
           )}
 
           <div className="modal-actions">
-            <WiredButton onClick={onCancel} className="modal-button">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="button modal-button"
+            >
               Cancel
-            </WiredButton>
-            <WiredButton onClick={handleSave} className="modal-button">
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="button modal-button"
+            >
               Save Tags
-            </WiredButton>
+            </button>
           </div>
-        </wired-card>
+        </div>
       </div>
     </div>
   );

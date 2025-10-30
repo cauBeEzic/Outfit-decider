@@ -1,32 +1,139 @@
-/* Action buttons grid styles */
+/* Layout container for wardrobe action buttons */
 .action-buttons {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--spacing-md);
-  max-width: 400px;
+  width: 100%;
+  max-width: 380px;               /* tighter, less edge-to-edge */
   margin: 0 auto;
-  padding: var(--spacing-lg) 0;
 }
 
-.action-grid {
+/* Two buttons side-by-side (stacks on mobile) */
+.button-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-md);
 }
 
-.generate-span {
-  grid-column: 1 / -1;
-}
-.action-btn {
+.action-slot { display: flex; }
+
+/* Make buttons chunky and less glossy */
+.action-button {
   width: 100%;
-  min-height: 60px;
-  font-size: 16px;
-  font-weight: 500;
+  min-height: 48px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  background: linear-gradient(#f7f7f7, #ececec);
+  border-radius: 6px;
+}
+.action-button:active { background: linear-gradient(#ececec, #e2e2e2); }
+
+.progress-row { grid-column: 1; }
+
+/* Generate bar */
+.generate-progress {
+  position: relative;
+  height: 48px;                   /* match buttons */
+  border: 1px solid var(--color-border, #0a246a);
+  border-radius: 6px;
+  background: #f4f4f4;            /* neutral track under fill */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.generate-progress:hover:not(.disabled):not(.loading) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+.generate-progress:focus-visible {
+  outline: 2px solid #316ac5;
+  outline-offset: 2px;
+}
+.generate-progress.disabled { cursor: not-allowed; opacity: .6; transform: none; box-shadow: none; }
+.generate-progress.loading { cursor: progress; }
+
+.progress-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* ===== Green segmented XP-style progress ===== */
+:root {
+  --bar-track: #eceff2;   /* light gray track */
+  --bar-fill:  #7fcf7f;   /* green brick */
+  --seg-w: 12px;          /* brick width */
+  --seg-gap: 1px;         /* divider thickness */
+}
+
+/* Base progress element */
+.progress-wrapper > .progress {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+}
+
+/* Track */
+.progress-wrapper > .progress::-webkit-progress-bar {
+  background: var(--bar-track);
+}
+
+/* Fill (WebKit) */
+.progress-wrapper > .progress::-webkit-progress-value {
+  background-color: var(--bar-fill);
+  background-image:
+    linear-gradient(to bottom, rgba(255,255,255,.5), rgba(255,255,255,0)), /* soft gloss */
+    repeating-linear-gradient(
+      90deg,
+      rgba(0,0,0,.18) 0 var(--seg-gap),       /* divider line */
+      transparent     var(--seg-gap) calc(var(--seg-w)) /* brick span */
+    );
+  background-size: auto, var(--seg-w) 100%;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+}
+
+/* Fill (Firefox) */
+.progress-wrapper > .progress::-moz-progress-bar {
+  background-color: var(--bar-fill);
+  background-image:
+    linear-gradient(to bottom, rgba(255,255,255,.5), rgba(255,255,255,0)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0,0,0,.18) 0 var(--seg-gap),
+      transparent     var(--seg-gap) calc(var(--seg-w))
+    );
+  background-size: auto, var(--seg-w) 100%;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+}
+
+/* Label sits above */
+.progress-label {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #1a1a1a;
+}
+
+/* Mobile: stack buttons; keep sizes usable */
 @media (max-width: 480px) {
-  .action-btn {
-    min-height: 55px;
-    font-size: 15px;
-  }
+  .button-row { grid-template-columns: 1fr; }
+  .action-button,
+  .generate-progress { height: 46px; min-height: 46px; }
+  .action-button { font-size: 14px; }
 }

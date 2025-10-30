@@ -1,0 +1,79 @@
+/* Auth screen XP.css styling */
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  background: linear-gradient(180deg, #245ed8 0%, #5c94ff 40%, #a3c4ff 100%);
+}
+
+.auth-window {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-window-body {
+  padding: var(--spacing-xl);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.auth-field label {
+  font-weight: 600;
+  color: #0a246a;
+}
+
+.auth-submit-button {
+  width: 100%;
+  min-height: 50px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.auth-error {
+  padding: var(--spacing-sm);
+  border: 1px solid #d32f2f;
+  border-radius: 6px;
+  background: #ffebee;
+  color: #b71c1c;
+  font-size: 14px;
+}
+
+.auth-toggle {
+  text-align: center;
+}
+
+.auth-toggle-button {
+  border: none;
+  background: none;
+  color: #0a246a;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.auth-toggle-button:hover {
+  color: #0b3fa8;
+}
+
+@media (max-width: 520px) {
+  .auth-screen {
+    padding: var(--spacing-lg);
+  }
+
+  .auth-window-body {
+    padding: var(--spacing-lg);
+  }
+}

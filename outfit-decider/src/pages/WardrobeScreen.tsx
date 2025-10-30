@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNanoBanana } from '@/hooks/useNanoBanana';
 import ClothingBox from '@/components/wardrobe/ClothingBox';
 import NavigationArrows from '@/components/wardrobe/NavigationArrows';
-import ActionButtons from '@/components/wardrobe/ActionButton';
+import ActionButtons from '@/components/wardrobe/ActionButtons';
 import FileMenu from '@/components/wardrobe/FileMenu';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
 import { ClothingItem } from '@/types';

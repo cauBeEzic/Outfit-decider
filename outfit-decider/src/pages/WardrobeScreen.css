@@ -6,6 +6,8 @@
   flex-direction: column;
   padding: var(--spacing-md);
   padding-right: 60px; /* Space for semi-circle */
+  background: linear-gradient(180deg, #245ed8 0%, #5c94ff 40%, #a3c4ff 100%);
+  font-family: 'Tahoma', 'Segoe UI', sans-serif;
 }
 
 .wardrobe-loading {
@@ -37,24 +39,15 @@
 }
 
 .wardrobe-error {
-  color: #d32f2f;
+  color: #f9f9f9;
   font-size: 14px;
   text-align: center;
-}
-
-/* Action buttons grid */
-.action-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: var(--spacing-md);
-  margin-top: auto;
-  padding: var(--spacing-md) 0;
-}
-
-/* Make Generate button span full width on bottom */
-.action-button:nth-child(3) {
-  grid-column: 1 / -1; /* Span both columns */
+  background: rgba(10, 36, 106, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 8px 12px;
+  border-radius: 6px;
+  max-width: 320px;
+  margin: 0 auto;
 }
 
 /* Semi-circle positioning */

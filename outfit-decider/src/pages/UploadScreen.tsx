@@ -2,7 +2,6 @@
 import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import WiredButton from '@/components/shared/WiredButton';
 import TagInput from '@/components/upload/TagInput';
 import { supabase, getStoragePath, getPublicUrl } from '@/lib/supabase';
 import { validateImageFile, compressImage } from '@/lib/imageUtils';
@@ -29,11 +28,20 @@ const UploadScreen: React.FC = () => {
   if (!isValidType) {
     return (
       <div className="upload-screen">
-        <div className="error-container">
-          <h1>Invalid clothing type</h1>
-          <WiredButton onClick={() => navigate('/')}>
-            Back to Wardrobe
-          </WiredButton>
+        <div className="error-container window">
+          <div className="title-bar">
+            <div className="title-bar-text">Error</div>
+          </div>
+          <div className="window-body">
+            <h1>Invalid clothing type</h1>
+            <button
+              type="button"
+              className="button"
+              onClick={() => navigate('/')}
+            >
+              Back to Wardrobe
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -141,15 +149,24 @@ const UploadScreen: React.FC = () => {
           <h1 className="screen-title">
             Upload {clothingType === 'top' ? 'Top' : 'Bottom'}
           </h1>
-          <WiredButton onClick={() => navigate('/')}>
+          <button
+            type="button"
+            className="button"
+            onClick={() => navigate('/')}
+          >
             Back
-          </WiredButton>
+          </button>
         </div>
 
         <div className="upload-container">
           <div className="upload-frame">
-            <wired-card elevation="3" className="upload-card">
-              <div className="upload-card-content">
+            <div className="window upload-window">
+              <div className="title-bar">
+                <div className="title-bar-text">
+                  {previewUrl ? 'Preview' : 'Capture Item'}
+                </div>
+              </div>
+              <div className="window-body upload-window-body">
                 {previewUrl ? (
                   <img src={previewUrl} alt="Preview" className="preview-image" />
                 ) : (
@@ -169,7 +186,7 @@ const UploadScreen: React.FC = () => {
                   </div>
                 )}
               </div>
-            </wired-card>
+            </div>
           </div>
 
           {/* Tag section - always rendered to maintain consistent spacing */}
@@ -208,20 +225,22 @@ const UploadScreen: React.FC = () => {
         {/* Action buttons below frame */}
         {previewUrl && (
           <div className="upload-actions">
-            <WiredButton
+            <button
+              type="button"
               onClick={handleRetake}
               disabled={uploading}
-              className="action-button"
+              className="button action-button"
             >
               Retake
-            </WiredButton>
-            <WiredButton
+            </button>
+            <button
+              type="button"
               onClick={handleSave}
               disabled={uploading}
-              className="action-button"
+              className="button action-button"
             >
               {uploading ? 'Saving...' : 'Save'}
-            </WiredButton>
+            </button>
           </div>
         )}
 

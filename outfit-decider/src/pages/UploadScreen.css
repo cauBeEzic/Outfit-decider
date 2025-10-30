@@ -33,13 +33,28 @@
   height: 400px;
 }
 
-.upload-card {
+.upload-window {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;  
+}
+
+.upload-window .title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.upload-window-body {
+  box-sizing: border-box;          /* <-- key fix */
   width: 100%;
   height: 100%;
-  display: block;
-  background: white;
   padding: var(--spacing-md);
-  overflow: hidden; /* Prevent image overflow */
+  overflow: hidden;                /* keep the inner white area contained */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .upload-card-content {
@@ -179,11 +194,13 @@
 }
 
 .error-container {
-  text-align: center;
+  max-width: 420px;
+  width: 100%;
 }
 
 .error-container h1 {
   margin-bottom: var(--spacing-lg);
+  text-align: center;
 }
 
 @media (max-width: 480px) {

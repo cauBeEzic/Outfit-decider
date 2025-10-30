@@ -4,25 +4,30 @@
 }
 
 .file-menu-button {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid var(--color-border);
-  background: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 2px solid #0a246a;
+  background: linear-gradient(180deg, #f0f6ff 0%, #cfe0ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: inset 0 1px #ffffff, inset 0 -1px #9db7ff;
 }
 
 .file-menu-button:hover {
-  background: #f5f5f5;
-  transform: scale(1.05);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px #ffffff, inset 0 -1px #9db7ff, 0 4px 10px rgba(10, 36, 106, 0.25);
+}
+
+.file-menu-button:active {
+  transform: translateY(1px);
 }
 
 .file-menu-button svg {
-  color: var(--color-text);
+  color: #0a246a;
 }
 
 .menu-overlay {
@@ -39,27 +44,42 @@
   z-index: 99;
 }
 
-.file-menu-dropdown wired-card {
-  background: white;
-  padding: var(--spacing-sm);
+.xp-menu-window {
+  background: linear-gradient(180deg, #f0f6ff 0%, #cfe0ff 100%);
+  border: 2px solid #0a246a;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(10, 36, 106, 0.2);
+  padding: 8px;
 }
 
-.menu-item {
+.xp-menu-window .menu-item {
   width: 100%;
-  padding: var(--spacing-md);
+  padding: 10px 14px;
   border: none;
-  background: none;
+  background: rgba(255, 255, 255, 0.85);
   text-align: left;
-  font-size: 16px;
+  font-size: 15px;
+  color: #0a246a;
   cursor: pointer;
-  transition: background 0.2s;
-  border-bottom: 1px solid #eee;
+  transition: background 0.2s, transform 0.1s;
+  border-radius: 6px;
+  margin-bottom: 6px;
 }
 
-.menu-item:last-child {
-  border-bottom: none;
+.xp-menu-window .menu-item:last-child {
+  margin-bottom: 0;
 }
 
-.menu-item:hover {
-  background: #f5f5f5;
+.xp-menu-window .menu-item:hover {
+  background: linear-gradient(180deg, #cfe0ff 0%, #a4bfff 100%);
+  transform: translateX(2px);
+}
+
+.xp-menu-window .menu-item:active {
+  transform: translateY(1px);
+}
+
+.xp-menu-window .menu-item:focus-visible {
+  outline: 3px solid #0a246a;
+  outline-offset: 2px;
 }

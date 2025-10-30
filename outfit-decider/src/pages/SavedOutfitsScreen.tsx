@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import WiredButton from '@/components/shared/WiredButton';
 import OutfitCard from '@/components/outfits/OutfitCard.tsx';
 import { supabase } from '@/lib/supabase';
 import { SavedOutfitWithItems } from '@/types';
@@ -157,17 +156,25 @@ const SavedOutfitsScreen: React.FC = () => {
       <div className="outfits-content">
         <div className="outfits-header">
           <h1 className="screen-title">Saved Outfits</h1>
-          <WiredButton onClick={() => navigate('/')}>
+          <button
+            type="button"
+            className="button"
+            onClick={() => navigate('/')}
+          >
             Back
-          </WiredButton>
+          </button>
         </div>
 
         {outfits.length === 0 ? (
           <div className="empty-state">
             <p>{PLACEHOLDER_MESSAGES.NO_OUTFITS}</p>
-            <WiredButton onClick={() => navigate('/')}>
+            <button
+              type="button"
+              className="button"
+              onClick={() => navigate('/')}
+            >
               Go to Wardrobe
-            </WiredButton>
+            </button>
           </div>
         ) : (
           <div className="outfits-list">

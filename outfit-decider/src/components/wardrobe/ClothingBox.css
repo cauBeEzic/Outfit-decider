@@ -5,14 +5,28 @@
   margin: 0 auto;
 }
 
-.clothing-card {
+.xp-window {
+  background: linear-gradient(180deg, #f0f6ff 0%, #cfe0ff 100%);
+  border: 2px solid #0a246a;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(10, 36, 106, 0.15);
+}
+
+.xp-window-body {
+  background: #ffffff;
+  border: 2px solid #9db7ff;
+  border-radius: 6px;
+  height: 100%;
   width: 100%;
-  height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
   padding: var(--spacing-md);
+}
+
+.clothing-card {
+  width: 100%;
+  height: 300px;
   overflow: hidden;
 }
 
