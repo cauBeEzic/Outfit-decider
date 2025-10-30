@@ -8,11 +8,9 @@ interface ActionButtonsProps {
   onRandom: () => void;
   onDescribe: () => void;
   onGenerate: () => void;
-  onSaveRating: () => void;
   randomDisabled: boolean;
   describeDisabled: boolean;
   generateDisabled: boolean;
-  saveRatingDisabled: boolean;
   generating: boolean;
 }
 
@@ -20,16 +18,14 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onRandom,
   onDescribe,
   onGenerate,
-  onSaveRating,
   randomDisabled,
   describeDisabled,
   generateDisabled,
-  saveRatingDisabled,
   generating,
 }) => {
   return (
     <div className="action-buttons">
-      <div className="button-row">
+      <div className="action-grid">
         <WiredButton
           onClick={onRandom}
           disabled={randomDisabled}
@@ -46,24 +42,14 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         >
           Describe
         </WiredButton>
-      </div>
 
-      <div className="button-row">
         <WiredButton
           onClick={onGenerate}
           disabled={generateDisabled || generating}
-          className="action-btn generate-button"
+          className="action-btn generate-button generate-span"
           title={generateDisabled ? PLACEHOLDER_MESSAGES.UPLOAD_PHOTO_FIRST : ''}
         >
           {generating ? 'Generating...' : 'Generate'}
-        </WiredButton>
-        
-        <WiredButton
-          onClick={onSaveRating}
-          disabled={saveRatingDisabled}
-          className="action-btn save-rating-button"
-        >
-          Save/Rating
         </WiredButton>
       </div>
     </div>

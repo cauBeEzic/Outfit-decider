@@ -8,7 +8,6 @@ import NavigationArrows from '@/components/wardrobe/NavigationArrows';
 import ActionButtons from '@/components/wardrobe/ActionButton';
 import FileMenu from '@/components/wardrobe/FileMenu';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
-import RatingModal from '@/components/shared/RatingModal';
 import { ClothingItem } from '@/types';
 import { supabase } from '@/lib/supabase';
 import './WardrobeScreen.css';
@@ -24,16 +23,12 @@ const WardrobeScreen: React.FC = () => {
   const [currentTopIndex, setCurrentTopIndex] = useState(0);
   const [currentBottomIndex, setCurrentBottomIndex] = useState(0);
   
-  // State for user photo and generated image
+  // State for user photo
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   
   // Loading states
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  
-  // Modal state
-  const [showRatingModal, setShowRatingModal] = useState(false);
 
   // Combine loading states
   const isGenerating = generating || nanoBanaGenerating;
@@ -42,13 +37,6 @@ const WardrobeScreen: React.FC = () => {
   useEffect(() => {
     loadWardrobe();
     loadUserPhoto();
-
-    if (typeof window !== 'undefined') {
-      const storedGenerated = sessionStorage.getItem('lastGeneratedImageUrl');
-      if (storedGenerated) {
-        setGeneratedImageUrl(storedGenerated);
-      }
-    }
   }, [user]);
 
   const loadWardrobe = async () => {
@@ -113,6 +101,37 @@ const WardrobeScreen: React.FC = () => {
 
     if (data) {
       setUserPhotoUrl(data.image_url);
+    }
+  };
+
+  const backupOriginalPhoto = async () => {
+    if (typeof window === 'undefined' || !userPhotoUrl) {
+      return;
+    }
+
+    try {
+      if (sessionStorage.getItem('originalUserPhotoData')) {
+        return;
+      }
+
+      const response = await fetch(userPhotoUrl, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Failed to fetch original photo');
+      }
+
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Failed to read original photo blob'));
+        reader.readAsDataURL(blob);
+      });
+
+      sessionStorage.setItem('originalUserPhotoData', dataUrl);
+      sessionStorage.setItem('originalUserPhotoSource', userPhotoUrl);
+    } catch (error) {
+      console.error('Failed to back up original user photo:', error);
     }
   };
 
@@ -195,6 +214,8 @@ const WardrobeScreen: React.FC = () => {
       return;
     }
 
+    await backupOriginalPhoto();
+
     setGenerating(true);
 
     try {
@@ -205,9 +226,15 @@ const WardrobeScreen: React.FC = () => {
       );
 
       if (result?.url) {
-        setGeneratedImageUrl(result.url);
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('lastGeneratedImageUrl', result.url);
+          sessionStorage.setItem(
+            'lastGeneratedOutfit',
+            JSON.stringify({
+              topId: currentTop?.id ?? null,
+              bottomId: currentBottom?.id ?? null,
+            })
+          );
         }
         if (result.persisted) {
           setUserPhotoUrl(result.url);
@@ -220,51 +247,6 @@ const WardrobeScreen: React.FC = () => {
       alert('Failed to generate try-on image');
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const handleSaveRating = () => {
-    // Show rating modal
-    setShowRatingModal(true);
-  };
-
-  const handleSaveOutfit = async (rating: number | null) => {
-    if (!user) return;
-
-    try {
-      const currentTop = tops[currentTopIndex];
-      const currentBottom = bottoms[currentBottomIndex];
-
-      // Save outfit to database
-      const { data: outfitData, error: outfitError } = await supabase
-        .from('saved_outfits')
-        .insert({
-          user_id: user.id,
-          top_id: currentTop?.id || null,
-          bottom_id: currentBottom?.id || null,
-          rating: rating,
-        })
-        .select()
-        .single();
-
-      if (outfitError) throw outfitError;
-
-      // If there's a generated image, save it
-      if (generatedImageUrl && outfitData) {
-        await supabase
-          .from('generated_photos')
-          .insert({
-            user_id: user.id,
-            outfit_id: outfitData.id,
-            image_url: generatedImageUrl,
-          });
-      }
-
-      setShowRatingModal(false);
-      alert('Outfit saved successfully!');
-    } catch (error) {
-      console.error('Error saving outfit:', error);
-      alert('Failed to save outfit');
     }
   };
 
@@ -332,11 +314,9 @@ const WardrobeScreen: React.FC = () => {
           onRandom={handleRandom}
           onDescribe={handleDescribe}
           onGenerate={handleGenerate}
-          onSaveRating={handleSaveRating}
           randomDisabled={!hasItems}
           describeDisabled={!hasBothTypes}
           generateDisabled={!canGenerate}
-          saveRatingDisabled={!generatedImageUrl}
           generating={isGenerating}
         />
       </div>
@@ -348,13 +328,6 @@ const WardrobeScreen: React.FC = () => {
         className="semi-circle-right"
       />
 
-      {/* Rating modal */}
-      {showRatingModal && (
-        <RatingModal
-          onSave={handleSaveOutfit}
-          onCancel={() => setShowRatingModal(false)}
-        />
-      )}
     </div>
   );
 };

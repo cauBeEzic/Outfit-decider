@@ -8,12 +8,15 @@
   padding: var(--spacing-lg) 0;
 }
 
-.button-row {
+.action-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-md);
 }
 
+.generate-span {
+  grid-column: 1 / -1;
+}
 .action-btn {
   width: 100%;
   min-height: 60px;

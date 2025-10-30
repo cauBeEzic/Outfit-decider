@@ -20,6 +20,36 @@ const SavedOutfitsScreen: React.FC = () => {
     loadOutfits();
   }, [user]);
 
+  const blobToDataUrl = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to load generated outfit image'));
+      reader.readAsDataURL(blob);
+    });
+
+  const resolveImageUrl = async (url: string | null): Promise<string | null> => {
+    if (!url) return null;
+    if (url.startsWith('data:')) return url;
+
+    try {
+      const parsed = new URL(url);
+      const match = parsed.pathname.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)/);
+      if (match) {
+        const bucket = match[1];
+        const path = decodeURIComponent(match[2]);
+        const { data, error } = await supabase.storage.from(bucket).download(path);
+        if (!error && data) {
+          return await blobToDataUrl(data);
+        }
+      }
+    } catch (error) {
+      console.warn('Unable to resolve generated outfit image URL', error);
+    }
+
+    return url;
+  };
+
   const loadOutfits = async () => {
     if (!user) return;
 
@@ -64,12 +94,18 @@ const SavedOutfitsScreen: React.FC = () => {
             .select('*')
             .eq('outfit_id', outfit.id)
             .order('created_at', { ascending: false });
+          const normalizedPhotos = await Promise.all(
+            (photosData || []).map(async (photo) => ({
+              ...photo,
+              image_url: await resolveImageUrl(photo.image_url),
+            }))
+          );
 
           return {
             ...outfit,
             top,
             bottom,
-            generated_photos: photosData || [],
+            generated_photos: normalizedPhotos,
           };
         })
       );

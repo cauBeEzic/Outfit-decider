@@ -125,6 +125,47 @@
   margin-top: var(--spacing-md);
 }
 
+.photo-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 440px;
+  width: 100%;
+}
+
+.photo-action-slot {
+  flex: 1 1 0; /* Force equal width */
+  min-width: 0;
+  display: flex;
+}
+
+.photo-action-slot wired-button {
+  width: 100%;
+  flex: 1;
+}
+
+.photo-action-button {
+  width: 100%;
+  min-height: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacing-md);
+  font-size: clamp(14px, 3.8vw, 16px);
+  font-weight: 500;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.reset-button {
+  color: #d32f2f;
+  padding-left: var(--spacing-lg) !important;
+  padding-right: var(--spacing-lg) !important;
+}
+
 .error-message {
   text-align: center;
   color: #d32f2f;

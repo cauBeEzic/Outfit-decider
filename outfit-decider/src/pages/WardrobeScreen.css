@@ -42,6 +42,21 @@
   text-align: center;
 }
 
+/* Action buttons grid */
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: var(--spacing-md);
+  margin-top: auto;
+  padding: var(--spacing-md) 0;
+}
+
+/* Make Generate button span full width on bottom */
+.action-button:nth-child(3) {
+  grid-column: 1 / -1; /* Span both columns */
+}
+
 /* Semi-circle positioning */
 .semi-circle-right {
   position: fixed;

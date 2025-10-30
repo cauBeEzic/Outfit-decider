@@ -1,8 +1,10 @@
 // User photo upload screen
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
+import WiredButton from '@/components/shared/WiredButton';
+import RatingModal from '@/components/shared/RatingModal';
 import { supabase, getStoragePath, getPublicUrl, getAllUserPhotoPaths } from '@/lib/supabase';
 import { validateImageFile, compressImage } from '@/lib/imageUtils';
 import { STORAGE_BUCKETS } from '@/utils/constants';
@@ -17,13 +19,30 @@ const UserPhotoScreen: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [hasGeneratedTryOn, setHasGeneratedTryOn] = useState(false);
+  const [hasOriginalBackup, setHasOriginalBackup] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [showDeleteButton, setShowDeleteButton] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const refreshGenerationState = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const generatedUrl = sessionStorage.getItem('lastGeneratedImageUrl');
+    const generatedOutfit = sessionStorage.getItem('lastGeneratedOutfit');
+    const backupData = sessionStorage.getItem('originalUserPhotoData');
+
+    setHasGeneratedTryOn(Boolean(generatedUrl && generatedOutfit));
+    setHasOriginalBackup(Boolean(backupData));
+  }, []);
+
   useEffect(() => {
     loadUserPhoto();
-  }, [user]);
+    refreshGenerationState();
+  }, [user, refreshGenerationState]);
 
   const loadUserPhoto = async () => {
     if (!user) return;
@@ -39,7 +58,12 @@ const UserPhotoScreen: React.FC = () => {
       setPreviewUrl(data.image_url);
     } else if (typeof window !== 'undefined') {
       sessionStorage.removeItem('lastGeneratedImageUrl');
+      sessionStorage.removeItem('lastGeneratedOutfit');
+      sessionStorage.removeItem('originalUserPhotoData');
+      sessionStorage.removeItem('originalUserPhotoSource');
     }
+
+    refreshGenerationState();
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +88,9 @@ const UserPhotoScreen: React.FC = () => {
 
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('lastGeneratedImageUrl');
+        sessionStorage.removeItem('lastGeneratedOutfit');
+        sessionStorage.removeItem('originalUserPhotoData');
+        sessionStorage.removeItem('originalUserPhotoSource');
       }
 
       const extension = compressedFile.type === 'image/png' ? 'png' : 'jpg';
@@ -112,6 +139,7 @@ const UserPhotoScreen: React.FC = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      refreshGenerationState();
     }
   };
 
@@ -166,17 +194,248 @@ const UserPhotoScreen: React.FC = () => {
       setShowDeleteButton(false);
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('lastGeneratedImageUrl');
+        sessionStorage.removeItem('lastGeneratedOutfit');
+        sessionStorage.removeItem('originalUserPhotoData');
+        sessionStorage.removeItem('originalUserPhotoSource');
       }
     } catch (err: any) {
       console.error('Delete error:', err);
       setError(err.message || 'Failed to delete photo');
     } finally {
       setUploading(false);
+      refreshGenerationState();
     }
   };
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleSaveRatingClick = () => {
+    if (!hasGeneratedTryOn) {
+      return;
+    }
+    setShowRatingModal(true);
+  };
+
+  const handleSaveOutfit = async (rating: number | null) => {
+    if (!user) return;
+
+    if (typeof window === 'undefined') {
+      setError('Unable to save rating in this environment.');
+      return;
+    }
+
+    const generatedUrl = sessionStorage.getItem('lastGeneratedImageUrl');
+    const outfitMetadata = sessionStorage.getItem('lastGeneratedOutfit');
+
+    if (!generatedUrl || !outfitMetadata) {
+      setError('No generated outfit available to save.');
+      setShowRatingModal(false);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(outfitMetadata || '{}') || {};
+      const topId = parsed.topId || null;
+      const bottomId = parsed.bottomId || null;
+
+      const downloadGeneratedImage = async (
+        imageUrl: string
+      ): Promise<{ blob: Blob; extension: 'jpg' | 'png'; mimeType: string }> => {
+        const inferExtension = (mimeType?: string | null): 'jpg' | 'png' =>
+          mimeType && mimeType.toLowerCase().includes('png') ? 'png' : 'jpg';
+
+        if (imageUrl.startsWith('data:')) {
+          const match = imageUrl.match(/^data:(.+);base64,(.*)$/);
+          if (!match) {
+            throw new Error('Stored generated image is not a valid data URL');
+          }
+          const mimeType = match[1];
+          const base64Data = match[2];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: mimeType || 'image/png' });
+          const extension = inferExtension(mimeType);
+          return {
+            blob,
+            extension,
+            mimeType: mimeType || `image/${extension}`,
+          };
+        }
+
+        const response = await fetch(imageUrl, { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to download generated outfit image');
+        }
+        const blob = await response.blob();
+        const mimeType = blob.type || response.headers.get('content-type') || 'image/jpeg';
+        const extension = inferExtension(mimeType);
+        return { blob, extension, mimeType };
+      };
+
+      const blobToDataUrl = (blob: Blob): Promise<string> =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Failed to convert generated image to data URL'));
+          reader.readAsDataURL(blob);
+        });
+
+      const { data: outfitData, error: outfitError } = await supabase
+        .from('saved_outfits')
+        .insert({
+          user_id: user.id,
+          top_id: topId,
+          bottom_id: bottomId,
+          rating,
+        })
+        .select()
+        .single();
+
+      if (outfitError) throw outfitError;
+
+      if (outfitData) {
+        const { blob, extension, mimeType } = await downloadGeneratedImage(generatedUrl);
+        const dataUrl = await blobToDataUrl(blob);
+        let storedImageUrl = dataUrl;
+        try {
+          const photoId =
+            typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+              ? crypto.randomUUID()
+              : `${Date.now()}`;
+          const storagePath = getStoragePath.generatedPhoto(user.id, photoId, extension);
+          const storageFile = new File([blob], `generated.${extension}`, { type: mimeType });
+          const { error: storageError } = await supabase.storage
+            .from(STORAGE_BUCKETS.GENERATED_PHOTOS)
+            .upload(storagePath, storageFile, {
+              upsert: true,
+              cacheControl: '0',
+              contentType: mimeType,
+            });
+
+          if (storageError) {
+            throw storageError;
+          }
+
+          // Storage copy is kept for persistence, but we continue to store the data URL
+          // in the database so it renders regardless of bucket ACL settings.
+        } catch (storageProblem) {
+          console.error('Failed to persist generated outfit image to storage:', storageProblem);
+        }
+
+        const { error: generatedPhotoError } = await supabase
+          .from('generated_photos')
+          .insert({
+            user_id: user.id,
+            outfit_id: outfitData.id,
+            image_url: storedImageUrl,
+          });
+
+        if (generatedPhotoError) {
+          console.error('Failed to save generated photo record:', generatedPhotoError);
+        }
+      }
+
+      setShowRatingModal(false);
+      alert('Outfit saved successfully!');
+    } catch (err: any) {
+      console.error('Error saving outfit:', err);
+      alert('Failed to save outfit');
+    }
+  };
+
+  const handleResetGenerated = async () => {
+    if (!user) return;
+
+    if (typeof window === 'undefined') {
+      setError('Unable to reset photo in this environment.');
+      return;
+    }
+
+    const backupDataUrl = sessionStorage.getItem('originalUserPhotoData');
+
+    if (!backupDataUrl) {
+      setError('No original photo available to restore.');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError('');
+
+      const [metadata, base64] = backupDataUrl.split(',');
+      if (!metadata || !base64) {
+        throw new Error('Stored photo backup is invalid.');
+      }
+
+      const mimeMatch = metadata.match(/data:(.*);base64/);
+      const mimeType = mimeMatch?.[1] || 'image/jpeg';
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType });
+
+      const extension = mimeType === 'image/png' ? 'png' : 'jpg';
+      const filePath = getStoragePath.userPhoto(user.id, extension);
+
+      await supabase.storage
+        .from(STORAGE_BUCKETS.USER_PHOTOS)
+        .remove(getAllUserPhotoPaths(user.id));
+
+      const fileName = `photo.${extension}`;
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKETS.USER_PHOTOS)
+        .upload(
+          filePath,
+          new File([blob], fileName, { type: mimeType }),
+          {
+            upsert: true,
+            contentType: mimeType,
+            cacheControl: '0',
+          }
+        );
+
+      if (uploadError) throw uploadError;
+
+      const restoredUrl = `${getPublicUrl(STORAGE_BUCKETS.USER_PHOTOS, filePath)}?t=${Date.now()}`;
+
+      const { error: dbError } = await supabase
+        .from('user_photos')
+        .upsert(
+          {
+            user_id: user.id,
+            image_url: restoredUrl,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
+
+      if (dbError) throw dbError;
+
+      setPhotoUrl(restoredUrl);
+      setPreviewUrl(restoredUrl);
+      setShowDeleteButton(false);
+
+      sessionStorage.removeItem('lastGeneratedImageUrl');
+      sessionStorage.removeItem('lastGeneratedOutfit');
+      sessionStorage.removeItem('originalUserPhotoData');
+      sessionStorage.removeItem('originalUserPhotoSource');
+      refreshGenerationState();
+    } catch (err: any) {
+      console.error('Reset error:', err);
+      setError(err.message || 'Failed to reset photo');
+    } finally {
+      setUploading(false);
+      refreshGenerationState();
+    }
   };
 
   return (
@@ -256,6 +515,30 @@ const UserPhotoScreen: React.FC = () => {
               : 'Click the camera icon to upload your photo'
             }
           </p>
+
+          <div className="photo-actions">
+            <div className="photo-action-slot">
+              <WiredButton
+                onClick={handleSaveRatingClick}
+                disabled={!hasGeneratedTryOn || uploading}
+                className="photo-action-button save-rating-button"
+                title={!hasGeneratedTryOn ? 'Generate an outfit before saving' : undefined}
+              >
+                Save / Rating
+              </WiredButton>
+            </div>
+
+            <div className="photo-action-slot">
+              <WiredButton
+                onClick={handleResetGenerated}
+                disabled={!hasGeneratedTryOn || !hasOriginalBackup || uploading}
+                className="photo-action-button reset-button"
+                title={!hasGeneratedTryOn ? 'No generated outfit to reset' : undefined}
+              >
+                Reset Photo    
+              </WiredButton>
+            </div>
+          </div>
         </div>
 
         {error && (
@@ -279,6 +562,13 @@ const UserPhotoScreen: React.FC = () => {
           style={{ display: 'none' }}
           capture="environment"
         />
+
+        {showRatingModal && (
+          <RatingModal
+            onSave={handleSaveOutfit}
+            onCancel={() => setShowRatingModal(false)}
+          />
+        )}
       </div>
     </div>
   );
