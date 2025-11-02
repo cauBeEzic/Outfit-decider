@@ -18,25 +18,23 @@ const NavigationArrows: React.FC<NavigationArrowsProps> = ({
   return (
     <div className={`navigation-arrows navigation-arrows-${position}`}>
       <button
+        type="button"
         onClick={onPrevious}
-        className="arrow-button arrow-left"
+        className="button xp-arrow-button arrow-left"
         disabled={disabled}
         aria-label="Previous item"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+        <span className="arrow-icon" aria-hidden="true">◄</span>
       </button>
 
       <button
+        type="button"
         onClick={onNext}
-        className="arrow-button arrow-right"
+        className="button xp-arrow-button arrow-right"
         disabled={disabled}
         aria-label="Next item"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
+        <span className="arrow-icon" aria-hidden="true">►</span>
       </button>
     </div>
   );

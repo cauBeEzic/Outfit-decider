@@ -1,13 +1,29 @@
 /* Saved outfits screen styles */
 .saved-outfits-screen {
   min-height: 100vh;
-  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  background: linear-gradient(180deg, #245ed8 0%, #5c94ff 40%, #a3c4ff 100%);
+  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+}
+
+.saved-outfits-window {
+  width: 100%;
+  max-width: 960px;
+}
+
+.saved-outfits-body {
+  padding: var(--spacing-xl);
+  position: relative;
 }
 
 .outfits-content {
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
 }
 
 .outfits-loading {
@@ -40,17 +56,20 @@
 .empty-state {
   text-align: center;
   padding: var(--spacing-xl) var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(10, 36, 106, 0.4);
+  border-radius: 8px;
 }
 
 .empty-state p {
   font-size: 18px;
-  color: var(--color-disabled);
+  color: #0a246a;
   margin-bottom: var(--spacing-lg);
 }
 
 @media (max-width: 600px) {
-  .saved-outfits-screen {
-    padding: var(--spacing-md);
+  .saved-outfits-body {
+    padding: var(--spacing-lg);
   }
 
   .screen-title {

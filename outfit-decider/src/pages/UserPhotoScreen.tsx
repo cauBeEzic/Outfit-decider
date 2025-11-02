@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
 import RatingModal from '@/components/shared/RatingModal';
+import FileMenu from '@/components/wardrobe/FileMenu';
 import { supabase, getStoragePath, getPublicUrl, getAllUserPhotoPaths } from '@/lib/supabase';
 import { validateImageFile, compressImage } from '@/lib/imageUtils';
 import { STORAGE_BUCKETS } from '@/utils/constants';
@@ -445,6 +446,9 @@ const UserPhotoScreen: React.FC = () => {
         onClick={() => navigate('/')}
         className="semi-circle-left"
       />
+
+      {/* File menu - top left */}
+      <FileMenu className="file-menu" />
 
       <div className="user-photo-content">
         <h1 className="screen-title">Your Photo</h1>

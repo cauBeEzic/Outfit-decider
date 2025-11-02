@@ -153,40 +153,47 @@ const SavedOutfitsScreen: React.FC = () => {
 
   return (
     <div className="saved-outfits-screen">
-      <div className="outfits-content">
-        <div className="outfits-header">
-          <h1 className="screen-title">Saved Outfits</h1>
-          <button
-            type="button"
-            className="button"
-            onClick={() => navigate('/')}
-          >
-            Back
-          </button>
+      <div className="window saved-outfits-window">
+        <div className="title-bar">
+          <div className="title-bar-text">Saved Outfits</div>
         </div>
+        <div className="window-body saved-outfits-body">
+          <div className="outfits-content">
+            <div className="outfits-header">
+              <h1 className="screen-title">Saved Outfits</h1>
+              <button
+                type="button"
+                className="button back-button"
+                onClick={() => navigate('/')}
+              >
+                Back
+              </button>
+            </div>
 
-        {outfits.length === 0 ? (
-          <div className="empty-state">
-            <p>{PLACEHOLDER_MESSAGES.NO_OUTFITS}</p>
-            <button
-              type="button"
-              className="button"
-              onClick={() => navigate('/')}
-            >
-              Go to Wardrobe
-            </button>
+            {outfits.length === 0 ? (
+              <div className="empty-state">
+                <p>{PLACEHOLDER_MESSAGES.NO_OUTFITS}</p>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => navigate('/')}
+                >
+                  Go to Wardrobe
+                </button>
+              </div>
+            ) : (
+              <div className="outfits-list">
+                {outfits.map(outfit => (
+                  <OutfitCard
+                    key={outfit.id}
+                    outfit={outfit}
+                    onDelete={() => handleDeleteOutfit(outfit.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="outfits-list">
-            {outfits.map(outfit => (
-              <OutfitCard
-                key={outfit.id}
-                outfit={outfit}
-                onDelete={() => handleDeleteOutfit(outfit.id)}
-              />
-            ))}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

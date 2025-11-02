@@ -268,57 +268,64 @@ const WardrobeScreen: React.FC = () => {
 
   return (
     <div className="wardrobe-screen">
-      {/* File Menu - top left */}
-      <FileMenu className="file-menu" />
-
-      {/* Main content area */}
-      <div className="wardrobe-content">
-        {/* Top clothing box */}
-        <div className="clothing-section">
-          <NavigationArrows
-            onPrevious={handleTopPrevious}
-            onNext={handleTopNext}
-            disabled={tops.length <= 1}
-            position="top"
-          />
-          <ClothingBox
-            item={currentTop}
-            type="top"
-            placeholderText="Upload your top"
-          />
+      <div className="window wardrobe-window">
+        <div className="title-bar">
+          <div className="title-bar-text">Wardrobe</div>
         </div>
+        <div className="window-body wardrobe-window-body">
+          {/* File Menu - top left */}
+          <FileMenu className="file-menu" />
 
-        {/* Bottom clothing box */}
-        <div className="clothing-section">
-          <NavigationArrows
-            onPrevious={handleBottomPrevious}
-            onNext={handleBottomNext}
-            disabled={bottoms.length <= 1}
-            position="bottom"
-          />
-          <ClothingBox
-            item={currentBottom}
-            type="bottom"
-            placeholderText="Upload your bottom"
-          />
+          {/* Main content area */}
+          <div className="wardrobe-content">
+            {/* Top clothing box */}
+            <div className="clothing-section">
+              <NavigationArrows
+                onPrevious={handleTopPrevious}
+                onNext={handleTopNext}
+                disabled={tops.length <= 1}
+                position="top"
+              />
+              <ClothingBox
+                item={currentTop}
+                type="top"
+                placeholderText="Upload your top"
+              />
+            </div>
+
+            {/* Bottom clothing box */}
+            <div className="clothing-section">
+              <NavigationArrows
+                onPrevious={handleBottomPrevious}
+                onNext={handleBottomNext}
+                disabled={bottoms.length <= 1}
+                position="bottom"
+              />
+              <ClothingBox
+                item={currentBottom}
+                type="bottom"
+                placeholderText="Upload your bottom"
+              />
+            </div>
+
+            {nanoBanaError && (
+              <p className="wardrobe-error" role="alert">
+                {nanoBanaError}
+              </p>
+            )}
+
+            {/* Action buttons - 2x2 grid */}
+            <ActionButtons
+              onRandom={handleRandom}
+              onDescribe={handleDescribe}
+              onGenerate={handleGenerate}
+              randomDisabled={!hasItems}
+              describeDisabled={!hasBothTypes}
+              generateDisabled={!canGenerate}
+              generating={isGenerating}
+            />
+          </div>
         </div>
-
-        {nanoBanaError && (
-          <p className="wardrobe-error" role="alert">
-            {nanoBanaError}
-          </p>
-        )}
-
-        {/* Action buttons - 2x2 grid */}
-        <ActionButtons
-          onRandom={handleRandom}
-          onDescribe={handleDescribe}
-          onGenerate={handleGenerate}
-          randomDisabled={!hasItems}
-          describeDisabled={!hasBothTypes}
-          generateDisabled={!canGenerate}
-          generating={isGenerating}
-        />
       </div>
 
       {/* Semi-circle navigation - right edge */}
@@ -327,7 +334,6 @@ const WardrobeScreen: React.FC = () => {
         onClick={() => navigate('/user-photo')}
         className="semi-circle-right"
       />
-
     </div>
   );
 };

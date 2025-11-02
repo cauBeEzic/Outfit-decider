@@ -85,65 +85,73 @@ const StorageScreen: React.FC = () => {
 
   return (
     <div className="storage-screen">
-      <div className="storage-content">
-        <div className="storage-header">
-          <h1 className="screen-title">Storage</h1>
-          <button
-            type="button"
-            className="button"
-            onClick={() => navigate('/')}
-          >
-            Back
-          </button>
+      <div className="window storage-window">
+        <div className="title-bar">
+          <div className="title-bar-text">Storage</div>
         </div>
-
-        {/* Filter section */}
-        {allTags.length > 0 && (
-          <div className="filter-section">
-            <div className="filter-header">
-              <h3>Filter by tags:</h3>
-              {selectedTags.length > 0 && (
-                <button
-                  onClick={handleClearFilters}
-                  className="clear-filters-btn"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-            <FilterTags
-              allTags={allTags}
-              selectedTags={selectedTags}
-              onTagToggle={handleTagToggle}
-            />
-          </div>
-        )}
-
-        {/* Items grid */}
-        {filteredItems.length === 0 ? (
-          <div className="empty-state">
-            <p>{items.length === 0 ? PLACEHOLDER_MESSAGES.NO_ITEMS : 'No items match the selected filters'}</p>
-            {items.length === 0 && (
+        <div className="window-body storage-window-body">
+          <div className="storage-content">
+            <div className="storage-header">
+              <h1 className="screen-title">Storage</h1>
               <button
                 type="button"
-                className="button"
-                onClick={() => navigate('/upload/top')}
+                className="button back-button"
+                onClick={() => navigate('/')}
               >
-                Upload First Item
+                Back
               </button>
+            </div>
+
+            {/* Filter section */}
+            {allTags.length > 0 && (
+              <div className="filter-section">
+                <div className="filter-header">
+                  <h3>Filter by tags:</h3>
+                  {selectedTags.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className="button clear-filters-btn"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+                <FilterTags
+                  allTags={allTags}
+                  selectedTags={selectedTags}
+                  onTagToggle={handleTagToggle}
+                />
+              </div>
+            )}
+
+            {/* Items grid */}
+            {filteredItems.length === 0 ? (
+              <div className="empty-state">
+                <p>{items.length === 0 ? PLACEHOLDER_MESSAGES.NO_ITEMS : 'No items match the selected filters'}</p>
+                {items.length === 0 && (
+                  <button
+                    type="button"
+                    className="button"
+                    onClick={() => navigate('/upload/top')}
+                  >
+                    Upload First Item
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="items-grid">
+                {filteredItems.map(item => (
+                  <ClothingCard
+                    key={item.id}
+                    item={item}
+                    onDelete={loadItems}
+                  />
+                ))}
+              </div>
             )}
           </div>
-        ) : (
-          <div className="items-grid">
-            {filteredItems.map(item => (
-              <ClothingCard
-                key={item.id}
-                item={item}
-                onDelete={loadItems}
-              />
-            ))}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

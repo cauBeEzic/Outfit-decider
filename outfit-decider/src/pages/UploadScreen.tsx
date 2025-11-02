@@ -36,7 +36,7 @@ const UploadScreen: React.FC = () => {
             <h1>Invalid clothing type</h1>
             <button
               type="button"
-              className="button"
+              className="button back-button"
               onClick={() => navigate('/')}
             >
               Back to Wardrobe
@@ -149,11 +149,11 @@ const UploadScreen: React.FC = () => {
           <h1 className="screen-title">
             Upload {clothingType === 'top' ? 'Top' : 'Bottom'}
           </h1>
-          <button
-            type="button"
-            className="button"
-            onClick={() => navigate('/')}
-          >
+              <button
+                type="button"
+                className="button back-button"
+                onClick={() => navigate('/')}
+              >
             Back
           </button>
         </div>

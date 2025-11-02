@@ -26,7 +26,7 @@
 
 .clothing-card {
   width: 100%;
-  height: 300px;
+  height: clamp(140px, 32vh, 280px);
   overflow: hidden;
 }
 
@@ -48,10 +48,33 @@
   text-align: center;
   font-size: 18px;
 }
-
 /* Responsive sizing */
 @media (max-width: 480px) {
   .clothing-card {
-    height: 250px;
+    height: clamp(130px, 40vh, 220px);
+  }
+}
+
+@media (max-height: 680px) {
+  .clothing-card {
+    height: clamp(130px, 34vh, 220px);
+  }
+}
+
+@media (max-height: 600px) {
+  .clothing-card {
+    height: clamp(120px, 36vh, 200px);
+  }
+}
+
+@media (max-height: 520px) {
+  .clothing-card {
+    height: clamp(110px, 38vh, 180px);
+  }
+}
+
+@media (max-height: 460px) {
+  .clothing-card {
+    height: clamp(100px, 42vh, 160px);
   }
 }

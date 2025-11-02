@@ -62,6 +62,14 @@ button {
   cursor: pointer;
 }
 
+.back-button {
+  min-width: 132px;
+  min-height: 48px;
+  padding: 10px 22px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.5;

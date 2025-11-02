@@ -11,6 +11,13 @@
   padding-bottom: 100px;
 }
 
+.file-menu {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: 10;
+}
+
 .semi-circle-left {
   position: fixed;
   left: 0;
@@ -202,6 +209,11 @@
 @media (max-width: 480px) {
   .user-photo-screen {
     padding-left: 50px;
+  }
+
+  .semi-circle-left {
+    left: clamp(-6px, -2vw, 0px);
+    transform: translateY(-50%) translateX(-10%);
   }
 
   .photo-window {

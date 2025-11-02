@@ -1,24 +1,106 @@
-/* Semi-circle navigation styles */
+/* Retro semi-circle nav buttons */
 .semi-circle-nav {
+  position: relative;
+  width: clamp(44px, 10vw, 68px);
+  height: clamp(88px, 26vh, 140px);
   border: none;
   background: transparent;
-  cursor: pointer;
   padding: 0;
-  transition: transform 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease;
+  isolation: isolate;
+}
+
+.semi-circle-nav::before,
+.semi-circle-nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transition: inherit;
+}
+
+.semi-circle-nav::before {
+  background: linear-gradient(180deg, #f0f6ff 0%, #cfe0ff 100%);
+  box-shadow:
+    inset 1px 0 0 rgba(255, 255, 255, 0.6),
+    inset -3px 0 6px rgba(10, 36, 106, 0.25),
+    0 6px 18px rgba(10, 36, 106, 0.35);
+}
+
+.semi-circle-nav::after {
+  inset: clamp(4px, 0.9vw, 8px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(207, 224, 255, 0.75));
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.6);
+}
+
+.semi-circle-left::before,
+.semi-circle-left::after {
+  border-radius: 0 999px 999px 0;
+  border: 2px solid #0a246a;
+  border-left: none;
+}
+
+.semi-circle-right::before,
+.semi-circle-right::after {
+  border-radius: 999px 0 0 999px;
+  border: 2px solid #0a246a;
+  border-right: none;
+}
+
+.semi-circle-nav::after {
+  border-color: rgba(9, 36, 106, 0.2);
 }
 
 .semi-circle-nav:hover {
-  transform: scale(1.05);
+  transform: translateX(var(--hover-shift, 0));
 }
 
-.semi-circle-nav svg {
-  color: var(--color-text);
+.semi-circle-left:hover {
+  --hover-shift: 2px;
 }
 
-.semi-circle-right {
-  /* Positioned by parent component */
+.semi-circle-right:hover {
+  --hover-shift: -2px;
 }
 
-.semi-circle-left {
-  /* Positioned by parent component */
+.semi-circle-nav:active::before {
+  background: linear-gradient(180deg, #c8daff 0%, #a4bfff 100%);
+}
+
+.semi-circle-nav:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 4px;
+}
+
+.semi-circle-arrow {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 700;
+  color: #0a246a;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+@media (max-height: 600px) {
+  .semi-circle-nav {
+    height: clamp(80px, 34vh, 120px);
+  }
+}
+
+@media (max-width: 480px) {
+  .semi-circle-nav {
+    width: clamp(32px, 16vw, 48px);
+    height: clamp(70px, 32vh, 110px);
+  }
+
+  .semi-circle-nav::after {
+    inset: clamp(3px, 1.2vw, 6px);
+  }
+
+  .semi-circle-arrow {
+    font-size: clamp(16px, 6vw, 20px);
+  }
 }

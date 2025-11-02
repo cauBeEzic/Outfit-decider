@@ -134,6 +134,27 @@
 @media (max-width: 480px) {
   .button-row { grid-template-columns: 1fr; }
   .action-button,
-  .generate-progress { height: 46px; min-height: 46px; }
+  .generate-progress { height: 44px; min-height: 44px; }
   .action-button { font-size: 14px; }
+}
+
+@media (max-height: 640px) {
+  .action-button,
+  .generate-progress { min-height: 42px; height: 42px; }
+  .action-button { font-size: 14px; }
+  .progress-label { font-size: 14px; }
+}
+
+@media (max-height: 560px) {
+  .action-button,
+  .generate-progress { min-height: 38px; height: 38px; }
+  .action-button { font-size: 13px; }
+  .progress-label { font-size: 13px; }
+}
+
+@media (max-height: 480px) {
+  .action-button,
+  .generate-progress { min-height: 36px; height: 36px; }
+  .action-button { font-size: 12px; }
+  .progress-label { font-size: 12px; }
 }
