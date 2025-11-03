@@ -42,3 +42,37 @@ _Estimates use Fibonacci-style points. Priorities are relative; adjust as plans 
 ---
 
 _Last updated: <fill in when you pick this up next>_
+
+## Appendix – W2 Onboarding Walkthrough Plan
+
+- **Goal**: Introduce first-time users to the core wardrobe workflow (upload photo → add garments → generate → save) with contextual tooltips that appear only until onboarding completes.
+- **Triggering logic**:
+  - Gate the tour behind `onboardingCompleted` from `useAuth()`.
+  - Auto-launch the first step when a signed-in user with incomplete onboarding lands on `WardrobeScreen`.
+  - Persist completion with `markOnboardingComplete()` once the final step is acknowledged.
+- **Tour behavior**:
+  - Render a single `<OnboardingCoachmark>` overlay component that reads from `ONBOARDING_STEPS` (`src/utils/constants.ts:20`) and positions itself relative to `targetElement`.
+  - Provide “Next” / “Back” actions, with “Skip tour” to immediately mark complete.
+  - Use a focus trap or `aria-modal="true"` so screen readers describe the tooltip content; add `aria-describedby` pointing at the step copy.
+  - When the referenced DOM node is absent (e.g., no saved outfits yet), skip that step gracefully and continue so the tour never blocks progress.
+- **State shape**:
+  ```ts
+  type OnboardingState = {
+    activeStepIndex: number;
+    dismissed: boolean;
+  };
+  ```
+  - Maintain locally in `WardrobeScreen` (React state) or via a dedicated hook (e.g., `useOnboardingCoachmarks`).
+  - Store the current step index in `sessionStorage` to allow refresh continuity without persisting it cross-device.
+- **Integration points**:
+  1. `WardrobeScreen.tsx`: inject `OnboardingCoachmark` near the root so it can overlay the full screen; pass show/hide state.
+  2. `FileMenu.tsx`, action buttons, and navigation controls: ensure they expose stable class names that match `ONBOARDING_STEPS.targetElement` (e.g., add `.generate-button` to the generate wrapper, `.save-rating-button` near save UI).
+  3. `AuthContext.tsx`: after `markOnboardingComplete()` resolves, update local state so the tour never reappears.
+- **Edge cases & fallback copy**:
+  - When the user has not uploaded a photo, the “Generate” step should explain the prerequisite and keep the CTA disabled.
+  - If the tour is skipped, show a lightweight reminder banner (“Need a refresher? Restart tour”) with a button that resets onboarding metadata.
+- **Testing checklist**:
+  - Tour mounts and unmounts cleanly without leaving scroll locks.
+  - Keyboard navigation cycles within the coachmark actions.
+  - `markOnboardingComplete()` called exactly once per completion/skipping path.
+  - Sessions that complete onboarding never see the tour again unless manually reset.

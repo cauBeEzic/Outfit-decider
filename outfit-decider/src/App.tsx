@@ -7,6 +7,7 @@ import UploadScreen from './pages/UploadScreen';
 import StorageScreen from './pages/StorageScreen';
 import SavedOutfitsScreen from './pages/SavedOutfitsScreen';
 import UserPhotoScreen from './pages/UserPhotoScreen';
+import OnboardingOverlay from './components/onboarding/OnboardingOverlay';
 
 function App() {
   const { user, loading } = useAuth();
@@ -58,6 +59,7 @@ function App() {
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <OnboardingOverlay />
     </BrowserRouter>
   );
 }

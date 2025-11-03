@@ -83,3 +83,25 @@
   outline: 3px solid #0a246a;
   outline-offset: 2px;
 }
+
+.menu-separator {
+  height: 1px;
+  margin: 8px 0;
+  border-bottom: 1px solid rgba(10, 36, 106, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.xp-menu-window .menu-item.destructive {
+  background: rgba(255, 235, 238, 0.9);
+  color: #9c1c1c;
+}
+
+.xp-menu-window .menu-item.destructive:hover {
+  background: linear-gradient(180deg, #ffd6db 0%, #ffb4be 100%);
+}
+
+.xp-menu-window .menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}

@@ -17,43 +17,53 @@ export const IMAGE_LIMITS = {
   },
 } as const;
 
+type OnboardingPosition = 'top' | 'bottom' | 'left' | 'right';
+
+export interface OnboardingStepConfig {
+  step: number;
+  title: string;
+  description: string;
+  targetElement: string;
+  position: OnboardingPosition;
+}
+
 export const ONBOARDING_STEPS = [
   {
     step: 1,
     title: 'Start by uploading your photo',
     description: 'Click here to add a full-body photo of yourself',
     targetElement: '.semi-circle-right',
-    position: 'left' as const,
+    position: 'left' as OnboardingPosition,
   },
   {
     step: 2,
     title: 'Upload your first top',
     description: 'Add tops to your wardrobe',
     targetElement: '.file-menu',
-    position: 'bottom' as const,
+    position: 'bottom' as OnboardingPosition,
   },
   {
     step: 3,
     title: 'Now upload a bottom',
     description: 'Add bottoms to complete your wardrobe',
     targetElement: '.file-menu',
-    position: 'bottom' as const,
+    position: 'bottom' as OnboardingPosition,
   },
   {
     step: 4,
     title: 'Click Generate to see yourself in this outfit',
     description: 'AI will place the clothes on your photo',
     targetElement: '.generate-button',
-    position: 'top' as const,
+    position: 'top' as OnboardingPosition,
   },
   {
     step: 5,
     title: 'Save your favorite outfits here',
     description: 'Rate and save combinations you love',
     targetElement: '.save-rating-button',
-    position: 'top' as const,
+    position: 'top' as OnboardingPosition,
   },
-] as const;
+] as const satisfies readonly OnboardingStepConfig[];
 
 export const PLACEHOLDER_MESSAGES = {
   TOP: 'Upload your top',

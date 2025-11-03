@@ -1,0 +1,107 @@
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 31, 78, 0.55);
+  z-index: 11000;
+  pointer-events: none;
+}
+
+.onboarding-highlight {
+  position: absolute;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 10px rgba(255, 255, 255, 0.35),
+    0 12px 24px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.onboarding-tooltip {
+  position: absolute;
+  max-width: 320px;
+  background: linear-gradient(180deg, #ffffff 0%, #e9f0ff 100%);
+  border: 2px solid #0a246a;
+  border-radius: 12px;
+  padding: 16px 18px 14px;
+  box-shadow: 0 12px 30px rgba(10, 36, 106, 0.3);
+  pointer-events: auto;
+}
+
+.onboarding-step-label {
+  font-size: 13px;
+  color: #0a246a;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.onboarding-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #0a246a;
+}
+
+.onboarding-description {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #162b68;
+  line-height: 1.4;
+}
+
+.onboarding-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.onboarding-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid #0a246a;
+  background: linear-gradient(180deg, #f0f6ff 0%, #cfe0ff 100%);
+  color: #0a246a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.onboarding-button:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(10, 36, 106, 0.25);
+}
+
+.onboarding-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.onboarding-button.secondary {
+  background: linear-gradient(180deg, #f7f9ff 0%, #dfe9ff 100%);
+}
+
+.onboarding-skip {
+  background: none;
+  border: none;
+  color: #0a246a;
+  text-decoration: underline;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.onboarding-skip:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.onboarding-highlight-target {
+  position: relative;
+  z-index: 11001;
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.95),
+    0 0 0 7px rgba(10, 36, 106, 0.35);
+  border-radius: 12px;
+}

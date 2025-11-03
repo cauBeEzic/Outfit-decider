@@ -136,6 +136,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         <div
           className={[
             'generate-progress',
+            'generate-button',
             generateDisabled ? 'disabled' : '',
             generating ? 'loading' : '',
           ]

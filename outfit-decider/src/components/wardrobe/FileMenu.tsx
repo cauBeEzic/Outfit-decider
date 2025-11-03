@@ -1,6 +1,7 @@
 // File menu dropdown component
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import './FileMenu.css';
 
 interface FileMenuProps {
@@ -9,11 +10,29 @@ interface FileMenuProps {
 
 const FileMenu: React.FC<FileMenuProps> = ({ className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const handleMenuClick = (path: string) => {
     setIsOpen(false);
     navigate(path);
+  };
+
+  const handleSignOut = async () => {
+    if (signingOut) return;
+
+    setSigningOut(true);
+    setIsOpen(false);
+
+    try {
+      await signOut();
+      navigate('/auth', { replace: true });
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+      alert('Failed to sign out. Please try again.');
+      setSigningOut(false);
+    }
   };
 
   return (
@@ -57,6 +76,16 @@ const FileMenu: React.FC<FileMenuProps> = ({ className = '' }) => {
                 onClick={() => handleMenuClick('/saved-outfits')}
               >
                 Saved Outfits
+              </button>
+              <div className="menu-separator" />
+              <button
+                className="menu-item destructive"
+                onClick={handleSignOut}
+                type="button"
+                disabled={signingOut}
+                aria-busy={signingOut}
+              >
+                {signingOut ? 'Logging out…' : 'Log Out'}
               </button>
             </div>
           </div>
