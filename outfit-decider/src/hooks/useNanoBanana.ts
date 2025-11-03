@@ -6,6 +6,7 @@ import { STORAGE_BUCKETS } from '@/utils/constants';
 
 export const useNanoBanana = (userId: string | undefined) => {
   const [generating, setGenerating] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /**
@@ -117,8 +118,8 @@ export const useNanoBanana = (userId: string | undefined) => {
       tops: Array<{ id: string; tags: string[] }>;
       bottoms: Array<{ id: string; tags: string[] }>;
     }
-  ): Promise<{ topId: string; bottomId: string; reasoning?: string } | null> => {
-    setGenerating(true);
+  ): Promise<{ topId: string; bottomId: string; reasoning?: string }> => {
+    setSuggesting(true);
     setError(null);
 
     try {
@@ -131,9 +132,9 @@ export const useNanoBanana = (userId: string | undefined) => {
     } catch (err: any) {
       console.error('Get suggestion error:', err);
       setError(err.message || 'Failed to get suggestion');
-      return null;
+      throw err;
     } finally {
-      setGenerating(false);
+      setSuggesting(false);
     }
   };
 
@@ -141,6 +142,7 @@ export const useNanoBanana = (userId: string | undefined) => {
     generateTryOn,
     getSuggestion,
     generating,
+    suggesting,
     error,
   };
 };

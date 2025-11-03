@@ -11,6 +11,7 @@ interface ActionButtonsProps {
   describeDisabled: boolean;
   generateDisabled: boolean;
   generating: boolean;
+  describeTooltip?: string;
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -21,6 +22,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   describeDisabled,
   generateDisabled,
   generating,
+  describeTooltip,
 }) => {
   const [progressValue, setProgressValue] = useState(0);
   const [progressLabel, setProgressLabel] = useState('Generate');
@@ -125,7 +127,11 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
             onClick={onDescribe}
             disabled={describeDisabled}
             className="button action-button"
-            title={describeDisabled ? PLACEHOLDER_MESSAGES.UPLOAD_BOTH_ITEMS : ''}
+            title={
+              describeDisabled
+                ? describeTooltip ?? PLACEHOLDER_MESSAGES.UPLOAD_BOTH_ITEMS
+                : ''
+            }
           >
             Describe
           </button>

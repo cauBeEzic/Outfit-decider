@@ -38,14 +38,14 @@ export const ONBOARDING_STEPS = [
   {
     step: 2,
     title: 'Upload your first top',
-    description: 'Add tops to your wardrobe',
+    description: 'Add a top to your wardrobe (optional)',
     targetElement: '.file-menu',
     position: 'bottom' as OnboardingPosition,
   },
   {
     step: 3,
     title: 'Now upload a bottom',
-    description: 'Add bottoms to complete your wardrobe',
+    description: 'Add a bottom or skip to style just one piece',
     targetElement: '.file-menu',
     position: 'bottom' as OnboardingPosition,
   },

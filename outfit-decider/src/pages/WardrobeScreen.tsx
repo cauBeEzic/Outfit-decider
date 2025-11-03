@@ -1,5 +1,5 @@
 // Main wardrobe screen with clothing boxes and actions
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNanoBanana } from '@/hooks/useNanoBanana';
@@ -7,15 +7,23 @@ import ClothingBox from '@/components/wardrobe/ClothingBox';
 import NavigationArrows from '@/components/wardrobe/NavigationArrows';
 import ActionButtons from '@/components/wardrobe/ActionButtons';
 import FileMenu from '@/components/wardrobe/FileMenu';
+import DescribeModal from '@/components/wardrobe/DescribeModal';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
 import { ClothingItem } from '@/types';
 import { supabase } from '@/lib/supabase';
+import { PLACEHOLDER_MESSAGES } from '@/utils/constants';
 import './WardrobeScreen.css';
 
 const WardrobeScreen: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { generateTryOn, generating: nanoBanaGenerating, error: nanoBanaError } = useNanoBanana(user?.id);
+  const {
+    generateTryOn,
+    getSuggestion,
+    generating: nanoBanaGenerating,
+    suggesting: nanoBanaSuggesting,
+    error: nanoBanaError,
+  } = useNanoBanana(user?.id);
 
   // State for clothing items
   const [tops, setTops] = useState<ClothingItem[]>([]);
@@ -29,9 +37,35 @@ const WardrobeScreen: React.FC = () => {
   // Loading states
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [describeModalOpen, setDescribeModalOpen] = useState(false);
+  const [describeError, setDescribeError] = useState<string | null>(null);
+  const [describeSuggestion, setDescribeSuggestion] = useState<{
+    top: ClothingItem | null;
+    bottom: ClothingItem | null;
+    reasoning?: string;
+  } | null>(null);
+  const [nanoErrorContext, setNanoErrorContext] = useState<'generate' | 'describe' | null>(null);
 
   // Combine loading states
   const isGenerating = generating || nanoBanaGenerating;
+  const isSuggesting = nanoBanaSuggesting;
+
+  const topOptions = useMemo<(ClothingItem | null)[]>(() => [null, ...tops], [tops]);
+  const bottomOptions = useMemo<(ClothingItem | null)[]>(() => [null, ...bottoms], [bottoms]);
+  const topOptionCount = topOptions.length;
+  const bottomOptionCount = bottomOptions.length;
+
+  useEffect(() => {
+    if (currentTopIndex >= topOptionCount) {
+      setCurrentTopIndex(Math.max(0, topOptionCount - 1));
+    }
+  }, [currentTopIndex, topOptionCount]);
+
+  useEffect(() => {
+    if (currentBottomIndex >= bottomOptionCount) {
+      setCurrentBottomIndex(Math.max(0, bottomOptionCount - 1));
+    }
+  }, [currentBottomIndex, bottomOptionCount]);
 
   // Load user's wardrobe on mount
   useEffect(() => {
@@ -52,7 +86,8 @@ const WardrobeScreen: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (topsError) throw topsError;
-      setTops(topsData || []);
+      const resolvedTops = topsData || [];
+      setTops(resolvedTops);
 
       // Load bottoms
       const { data: bottomsData, error: bottomsError } = await supabase
@@ -63,7 +98,8 @@ const WardrobeScreen: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (bottomsError) throw bottomsError;
-      setBottoms(bottomsData || []);
+      const resolvedBottoms = bottomsData || [];
+      setBottoms(resolvedBottoms);
 
       // Load last viewed preferences
       const { data: prefsData } = await supabase
@@ -72,17 +108,31 @@ const WardrobeScreen: React.FC = () => {
         .eq('user_id', user.id)
         .single();
 
+      let nextTopIndex = resolvedTops.length > 0 ? 1 : 0;
+      let nextBottomIndex = resolvedBottoms.length > 0 ? 1 : 0;
+
       if (prefsData) {
-        // Find indices of last viewed items
-        if (prefsData.last_viewed_top_id && topsData) {
-          const topIndex = topsData.findIndex(t => t.id === prefsData.last_viewed_top_id);
-          if (topIndex !== -1) setCurrentTopIndex(topIndex);
+        if (prefsData.last_viewed_top_id && resolvedTops.length > 0) {
+          const topIndex = resolvedTops.findIndex(t => t.id === prefsData.last_viewed_top_id);
+          if (topIndex !== -1) {
+            nextTopIndex = topIndex + 1;
+          }
+        } else if (prefsData.last_viewed_top_id === null) {
+          nextTopIndex = 0;
         }
-        if (prefsData.last_viewed_bottom_id && bottomsData) {
-          const bottomIndex = bottomsData.findIndex(b => b.id === prefsData.last_viewed_bottom_id);
-          if (bottomIndex !== -1) setCurrentBottomIndex(bottomIndex);
+
+        if (prefsData.last_viewed_bottom_id && resolvedBottoms.length > 0) {
+          const bottomIndex = resolvedBottoms.findIndex(b => b.id === prefsData.last_viewed_bottom_id);
+          if (bottomIndex !== -1) {
+            nextBottomIndex = bottomIndex + 1;
+          }
+        } else if (prefsData.last_viewed_bottom_id === null) {
+          nextBottomIndex = 0;
         }
       }
+
+      setCurrentTopIndex(nextTopIndex);
+      setCurrentBottomIndex(nextBottomIndex);
     } catch (error) {
       console.error('Error loading wardrobe:', error);
     } finally {
@@ -136,19 +186,22 @@ const WardrobeScreen: React.FC = () => {
   };
 
   // Save current view state
-  const saveCurrentView = async () => {
+  const saveCurrentView = async (
+    topOverride?: ClothingItem | null,
+    bottomOverride?: ClothingItem | null,
+  ) => {
     if (!user) return;
 
-    const currentTop = tops[currentTopIndex];
-    const currentBottom = bottoms[currentBottomIndex];
+    const selectedTop = topOverride ?? topOptions[currentTopIndex] ?? null;
+    const selectedBottom = bottomOverride ?? bottomOptions[currentBottomIndex] ?? null;
 
     await supabase
       .from('user_preferences')
       .upsert(
         {
           user_id: user.id,
-          last_viewed_top_id: currentTop?.id || null,
-          last_viewed_bottom_id: currentBottom?.id || null,
+          last_viewed_top_id: selectedTop?.id || null,
+          last_viewed_bottom_id: selectedBottom?.id || null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
@@ -157,47 +210,217 @@ const WardrobeScreen: React.FC = () => {
 
   // Navigation handlers
   const handleTopPrevious = () => {
-    if (tops.length > 1) {
-      setCurrentTopIndex((prev) => (prev - 1 + tops.length) % tops.length);
-      saveCurrentView();
+    if (topOptionCount > 1) {
+      setCurrentTopIndex((prev) => {
+        const nextIndex = (prev - 1 + topOptionCount) % topOptionCount;
+        void saveCurrentView(topOptions[nextIndex], bottomOptions[currentBottomIndex] ?? null);
+        return nextIndex;
+      });
     }
   };
 
   const handleTopNext = () => {
-    if (tops.length > 1) {
-      setCurrentTopIndex((prev) => (prev + 1) % tops.length);
-      saveCurrentView();
+    if (topOptionCount > 1) {
+      setCurrentTopIndex((prev) => {
+        const nextIndex = (prev + 1) % topOptionCount;
+        void saveCurrentView(topOptions[nextIndex], bottomOptions[currentBottomIndex] ?? null);
+        return nextIndex;
+      });
     }
   };
 
   const handleBottomPrevious = () => {
-    if (bottoms.length > 1) {
-      setCurrentBottomIndex((prev) => (prev - 1 + bottoms.length) % bottoms.length);
-      saveCurrentView();
+    if (bottomOptionCount > 1) {
+      setCurrentBottomIndex((prev) => {
+        const nextIndex = (prev - 1 + bottomOptionCount) % bottomOptionCount;
+        void saveCurrentView(topOptions[currentTopIndex] ?? null, bottomOptions[nextIndex]);
+        return nextIndex;
+      });
     }
   };
 
   const handleBottomNext = () => {
-    if (bottoms.length > 1) {
-      setCurrentBottomIndex((prev) => (prev + 1) % bottoms.length);
-      saveCurrentView();
+    if (bottomOptionCount > 1) {
+      setCurrentBottomIndex((prev) => {
+        const nextIndex = (prev + 1) % bottomOptionCount;
+        void saveCurrentView(topOptions[currentTopIndex] ?? null, bottomOptions[nextIndex]);
+        return nextIndex;
+      });
     }
   };
 
   // Action handlers
   const handleRandom = () => {
-    if (tops.length > 0) {
-      setCurrentTopIndex(Math.floor(Math.random() * tops.length));
+    let nextTopIndex = currentTopIndex;
+    let nextBottomIndex = currentBottomIndex;
+
+    if (topOptionCount > 0) {
+      nextTopIndex = Math.floor(Math.random() * topOptionCount);
+      setCurrentTopIndex(nextTopIndex);
     }
-    if (bottoms.length > 0) {
-      setCurrentBottomIndex(Math.floor(Math.random() * bottoms.length));
+    if (bottomOptionCount > 0) {
+      nextBottomIndex = Math.floor(Math.random() * bottomOptionCount);
+      setCurrentBottomIndex(nextBottomIndex);
     }
-    saveCurrentView();
+
+    void saveCurrentView(topOptions[nextTopIndex] ?? null, bottomOptions[nextBottomIndex] ?? null);
   };
 
   const handleDescribe = () => {
-    // TODO: Implement AI describe feature
-    alert('Describe feature coming soon!');
+    setDescribeError(null);
+    setDescribeSuggestion(null);
+    setDescribeModalOpen(true);
+  };
+
+  const handleDescribeSubmit = async ({
+    prompt,
+    includeSelectedPieces,
+    includeSelectedTags,
+  }: {
+    prompt: string;
+    includeSelectedPieces: boolean;
+    includeSelectedTags: boolean;
+  }) => {
+    const topSelection = topOptions[currentTopIndex] ?? null;
+    const bottomSelection = bottomOptions[currentBottomIndex] ?? null;
+
+    setNanoErrorContext('describe');
+
+    const allTags = new Set<string>();
+    tops.forEach((item) => item.tags?.forEach((tag) => allTags.add(tag)));
+    bottoms.forEach((item) => item.tags?.forEach((tag) => allTags.add(tag)));
+
+    const selectionTags = new Set<string>();
+    if (includeSelectedTags) {
+      topSelection?.tags?.forEach((tag) => selectionTags.add(tag));
+      bottomSelection?.tags?.forEach((tag) => selectionTags.add(tag));
+    }
+
+    const promptSections: string[] = [];
+    const trimmedPrompt = prompt.trim();
+    if (trimmedPrompt) {
+      promptSections.push(trimmedPrompt);
+    }
+    if (includeSelectedPieces && (topSelection || bottomSelection)) {
+      const selectionSummary: string[] = [];
+      if (topSelection) {
+        selectionSummary.push(
+          `Current top tags: ${
+            topSelection.tags?.length ? topSelection.tags.join(', ') : 'none provided'
+          }`,
+        );
+      }
+      if (bottomSelection) {
+        selectionSummary.push(
+          `Current bottom tags: ${
+            bottomSelection.tags?.length ? bottomSelection.tags.join(', ') : 'none provided'
+          }`,
+        );
+      }
+      promptSections.push(selectionSummary.join(' | '));
+    }
+    if (includeSelectedTags && selectionTags.size > 0) {
+      promptSections.push(`Prioritize wardrobe tags: ${Array.from(selectionTags).join(', ')}`);
+    }
+
+    const finalPrompt =
+      promptSections.length > 0
+        ? promptSections.join('\n\n')
+        : 'Suggest a complementary outfit from the items in my wardrobe.';
+
+    setDescribeError(null);
+    setDescribeSuggestion(null);
+
+    const createLabel = (item: ClothingItem | null, fallback: string) => {
+      if (!item) return fallback;
+      if (item.tags && item.tags.length > 0) {
+        return `${item.tags[0]} ${item.type}`;
+      }
+      return `${item.type} from your wardrobe`;
+    };
+
+    const sanitizeReasoning = (
+      reasoning: string | undefined,
+      topItem: ClothingItem | null,
+      bottomItem: ClothingItem | null,
+    ) => {
+      if (!reasoning) return undefined;
+      let sanitized = reasoning;
+      if (topItem) {
+        const label = createLabel(topItem, 'your top');
+        const pattern = new RegExp(topItem.id, 'g');
+        const quotedPattern = new RegExp(`'${topItem.id}'`, 'g');
+        sanitized = sanitized.replace(quotedPattern, label).replace(pattern, label);
+      }
+      if (bottomItem) {
+        const label = createLabel(bottomItem, 'your bottom');
+        const pattern = new RegExp(bottomItem.id, 'g');
+        const quotedPattern = new RegExp(`'${bottomItem.id}'`, 'g');
+        sanitized = sanitized.replace(quotedPattern, label).replace(pattern, label);
+      }
+      return sanitized;
+    };
+
+    try {
+      const result = await getSuggestion(finalPrompt, Array.from(allTags), {
+        tops: tops.map((item) => ({ id: item.id, tags: item.tags || [] })),
+        bottoms: bottoms.map((item) => ({ id: item.id, tags: item.tags || [] })),
+      });
+
+      const suggestedTop = tops.find((item) => item.id === result.topId) ?? null;
+      const suggestedBottom = bottoms.find((item) => item.id === result.bottomId) ?? null;
+
+      if (!suggestedTop || !suggestedBottom) {
+        setDescribeError('The AI referenced items that are no longer in your wardrobe.');
+        return;
+      }
+
+      setDescribeSuggestion({
+        top: suggestedTop,
+        bottom: suggestedBottom,
+        reasoning: sanitizeReasoning(result.reasoning, suggestedTop, suggestedBottom),
+      });
+    } catch (error: any) {
+      setDescribeError(error?.message || 'Failed to get a suggestion. Please try again.');
+    }
+  };
+
+  const handleApplySuggestion = () => {
+    if (!describeSuggestion) return;
+
+    const appliedTop = describeSuggestion.top;
+    const appliedBottom = describeSuggestion.bottom;
+
+    const nextTopIndex = appliedTop
+      ? topOptions.findIndex((item) => item?.id === appliedTop.id)
+      : 0;
+    const nextBottomIndex = appliedBottom
+      ? bottomOptions.findIndex((item) => item?.id === appliedBottom.id)
+      : 0;
+
+    if (nextTopIndex >= 0) {
+      setCurrentTopIndex(nextTopIndex);
+    }
+    if (nextBottomIndex >= 0) {
+      setCurrentBottomIndex(nextBottomIndex);
+    }
+
+    void saveCurrentView(appliedTop, appliedBottom);
+    setDescribeModalOpen(false);
+  };
+
+  const handleCloseDescribeModal = () => {
+    if (isSuggesting) {
+      return;
+    }
+    setDescribeModalOpen(false);
+    setDescribeError(null);
+    setDescribeSuggestion(null);
+  };
+
+  const handleResetDescribeSuggestion = () => {
+    setDescribeSuggestion(null);
+    setDescribeError(null);
   };
 
   const handleGenerate = async () => {
@@ -206,10 +429,10 @@ const WardrobeScreen: React.FC = () => {
       return;
     }
 
-    const currentTop = tops[currentTopIndex];
-    const currentBottom = bottoms[currentBottomIndex];
+    const topSelection = topOptions[currentTopIndex] ?? null;
+    const bottomSelection = bottomOptions[currentBottomIndex] ?? null;
 
-    if (!currentTop && !currentBottom) {
+    if (!topSelection && !bottomSelection) {
       alert('Please select at least one clothing item!');
       return;
     }
@@ -217,12 +440,13 @@ const WardrobeScreen: React.FC = () => {
     await backupOriginalPhoto();
 
     setGenerating(true);
+    setNanoErrorContext('generate');
 
     try {
       const result = await generateTryOn(
         userPhotoUrl,
-        currentTop?.image_url,
-        currentBottom?.image_url
+        topSelection?.image_url,
+        bottomSelection?.image_url
       );
 
       if (result?.url) {
@@ -231,32 +455,41 @@ const WardrobeScreen: React.FC = () => {
           sessionStorage.setItem(
             'lastGeneratedOutfit',
             JSON.stringify({
-              topId: currentTop?.id ?? null,
-              bottomId: currentBottom?.id ?? null,
+              topId: topSelection?.id ?? null,
+              bottomId: bottomSelection?.id ?? null,
             })
           );
         }
         if (result.persisted) {
           setUserPhotoUrl(result.url);
         }
+        setNanoErrorContext(null);
       } else if (nanoBanaError) {
         alert(`Generation failed: ${nanoBanaError}`);
+        setNanoErrorContext('generate');
       }
     } catch (error: any) {
       console.error('Generate error:', error);
       alert('Failed to generate try-on image');
+      setNanoErrorContext('generate');
     } finally {
       setGenerating(false);
     }
   };
 
-  const currentTop = tops[currentTopIndex];
-  const currentBottom = bottoms[currentBottomIndex];
+  const selectedTop = topOptions[currentTopIndex] ?? null;
+  const selectedBottom = bottomOptions[currentBottomIndex] ?? null;
   
   // Button disable logic
   const hasItems = tops.length > 0 || bottoms.length > 0;
   const hasBothTypes = tops.length > 0 && bottoms.length > 0;
   const canGenerate = hasItems && userPhotoUrl;
+  const showGlobalError = Boolean(nanoBanaError) && nanoErrorContext !== 'describe';
+  const describeTooltip = !hasBothTypes
+    ? PLACEHOLDER_MESSAGES.UPLOAD_BOTH_ITEMS
+    : isSuggesting
+      ? 'Hang tight - finding an outfit idea...'
+      : undefined;
 
   if (loading) {
     return (
@@ -283,11 +516,11 @@ const WardrobeScreen: React.FC = () => {
               <NavigationArrows
                 onPrevious={handleTopPrevious}
                 onNext={handleTopNext}
-                disabled={tops.length <= 1}
+                disabled={topOptionCount <= 1}
                 position="top"
               />
               <ClothingBox
-                item={currentTop}
+                item={selectedTop || undefined}
                 type="top"
                 placeholderText="Upload your top"
               />
@@ -298,17 +531,17 @@ const WardrobeScreen: React.FC = () => {
               <NavigationArrows
                 onPrevious={handleBottomPrevious}
                 onNext={handleBottomNext}
-                disabled={bottoms.length <= 1}
+                disabled={bottomOptionCount <= 1}
                 position="bottom"
               />
               <ClothingBox
-                item={currentBottom}
+                item={selectedBottom || undefined}
                 type="bottom"
                 placeholderText="Upload your bottom"
               />
             </div>
 
-            {nanoBanaError && (
+            {showGlobalError && (
               <p className="wardrobe-error" role="alert">
                 {nanoBanaError}
               </p>
@@ -320,9 +553,10 @@ const WardrobeScreen: React.FC = () => {
               onDescribe={handleDescribe}
               onGenerate={handleGenerate}
               randomDisabled={!hasItems}
-              describeDisabled={!hasBothTypes}
+              describeDisabled={!hasBothTypes || isSuggesting}
               generateDisabled={!canGenerate}
               generating={isGenerating}
+              describeTooltip={describeTooltip}
             />
           </div>
         </div>
@@ -333,6 +567,18 @@ const WardrobeScreen: React.FC = () => {
         direction="right"
         onClick={() => navigate('/user-photo')}
         className="semi-circle-right"
+      />
+      <DescribeModal
+        isOpen={describeModalOpen}
+        onClose={handleCloseDescribeModal}
+        onSubmit={handleDescribeSubmit}
+        isSubmitting={isSuggesting}
+        error={describeError}
+        suggestion={describeSuggestion}
+        onApplySuggestion={handleApplySuggestion}
+        onResetSuggestion={handleResetDescribeSuggestion}
+        currentTop={selectedTop}
+        currentBottom={selectedBottom}
       />
     </div>
   );
