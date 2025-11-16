@@ -26,7 +26,8 @@
 
 .clothing-card {
   width: 100%;
-  height: clamp(140px, 32vh, 280px);
+  height: clamp(140px, 26vh, 240px);
+  max-height: 100%;
   overflow: hidden;
 }
 
@@ -51,30 +52,30 @@
 /* Responsive sizing */
 @media (max-width: 480px) {
   .clothing-card {
-    height: clamp(130px, 40vh, 220px);
+    height: clamp(120px, 34vh, 210px);
   }
 }
 
 @media (max-height: 680px) {
   .clothing-card {
-    height: clamp(130px, 34vh, 220px);
+    height: clamp(120px, 30vh, 210px);
   }
 }
 
 @media (max-height: 600px) {
   .clothing-card {
-    height: clamp(120px, 36vh, 200px);
+    height: clamp(110px, 28vh, 190px);
   }
 }
 
 @media (max-height: 520px) {
   .clothing-card {
-    height: clamp(110px, 38vh, 180px);
+    height: clamp(100px, 26vh, 170px);
   }
 }
 
 @media (max-height: 460px) {
   .clothing-card {
-    height: clamp(100px, 42vh, 160px);
+    height: clamp(96px, 24vh, 150px);
   }
 }

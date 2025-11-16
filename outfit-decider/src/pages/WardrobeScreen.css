@@ -55,12 +55,13 @@
 
 .wardrobe-content {
   flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-rows: repeat(2, minmax(0, 1fr)) auto;
-  gap: clamp(10px, 2vh, 20px);
-  padding-top: clamp(26px, 5.5vh, 48px); /* Space for file menu */
-  padding-bottom: clamp(14px, 2.5vh, 22px);
-  margin-top: clamp(6px, 2vh, 14px);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) max-content;
+  gap: clamp(8px, 1.8vh, 18px);
+  padding-top: clamp(18px, 4.5vh, 40px);
+  padding-bottom: clamp(10px, 2vh, 18px);
+  margin-top: clamp(6px, 1.8vh, 12px);
 }
 
 .clothing-section {
@@ -82,6 +83,7 @@
   border-radius: 6px;
   max-width: 320px;
   margin: 0 auto;
+  flex-shrink: 0;
 }
 
 /* Semi-circle positioning */
@@ -105,8 +107,8 @@
   }
 
   .wardrobe-content {
-    padding-top: clamp(20px, 8vh, 36px);
-    gap: clamp(10px, 3vh, 16px);
+    padding-top: clamp(14px, 5vh, 28px);
+    gap: clamp(8px, 2.5vh, 14px);
   }
 
   .semi-circle-right {
@@ -126,9 +128,9 @@
   }
 
   .wardrobe-content {
-    padding-top: clamp(16px, 4.5vh, 34px);
-    padding-bottom: clamp(12px, 2vh, 18px);
-    gap: clamp(10px, 1.8vh, 16px);
+    padding-top: clamp(10px, 3vh, 24px);
+    padding-bottom: clamp(8px, 1.4vh, 14px);
+    gap: clamp(6px, 1.4vh, 12px);
   }
 }
 
@@ -143,9 +145,9 @@
   }
 
   .wardrobe-content {
-    padding-top: clamp(12px, 4.5vh, 28px);
-    padding-bottom: clamp(8px, 1.8vh, 14px);
-    gap: clamp(8px, 1.6vh, 12px);
+    padding-top: clamp(8px, 2.4vh, 18px);
+    padding-bottom: clamp(6px, 1.2vh, 12px);
+    gap: clamp(6px, 1.2vh, 10px);
   }
 }
 
@@ -160,10 +162,9 @@
   }
 
   .wardrobe-content {
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto;
-    padding-top: clamp(10px, 3.5vh, 22px);
-    padding-bottom: clamp(6px, 1.5vh, 12px);
-    gap: clamp(6px, 1.4vh, 10px);
+    padding-top: clamp(6px, 2vh, 14px);
+    padding-bottom: clamp(4px, 1vh, 10px);
+    gap: clamp(4px, 1vh, 10px);
   }
 }
 
@@ -178,14 +179,19 @@
   }
 
   .wardrobe-content {
-    padding-top: clamp(8px, 3.5vh, 16px);
-    padding-bottom: clamp(4px, 1.2vh, 10px);
-    gap: clamp(4px, 1.2vh, 8px);
+    padding-top: clamp(4px, 1.8vh, 10px);
+    padding-bottom: clamp(4px, 1vh, 8px);
+    gap: clamp(4px, 1vh, 8px);
   }
 }
 
 @media (max-height: 420px) {
+  .wardrobe-screen {
+    padding: clamp(4px, 2vw, 12px);
+    padding-right: clamp(20px, 5vw, 36px);
+  }
+
   .wardrobe-window-body {
-    overflow-y: auto;
+    padding: clamp(4px, 2vw, 10px);
   }
 }
