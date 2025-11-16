@@ -439,6 +439,12 @@ const WardrobeScreen: React.FC = () => {
 
     await backupOriginalPhoto();
 
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('generationPending', 'true');
+      sessionStorage.removeItem('generationError');
+    }
+    navigate('/user-photo', { state: { pendingGeneration: true } });
+
     setGenerating(true);
     setNanoErrorContext('generate');
 
@@ -464,15 +470,30 @@ const WardrobeScreen: React.FC = () => {
           setUserPhotoUrl(result.url);
         }
         setNanoErrorContext(null);
-      } else if (nanoBanaError) {
-        alert(`Generation failed: ${nanoBanaError}`);
+      } else {
+        const failureMessage = nanoBanaError || 'Generation failed. Please try again.';
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('generationError', failureMessage);
+        }
+        if (nanoBanaError) {
+          alert(`Generation failed: ${nanoBanaError}`);
+        }
         setNanoErrorContext('generate');
       }
     } catch (error: any) {
       console.error('Generate error:', error);
       alert('Failed to generate try-on image');
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(
+          'generationError',
+          error?.message || 'Failed to generate try-on image'
+        );
+      }
       setNanoErrorContext('generate');
     } finally {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('generationPending');
+      }
       setGenerating(false);
     }
   };

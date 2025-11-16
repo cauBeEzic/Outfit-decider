@@ -1,5 +1,5 @@
 // Custom hook for Nano Banana API operations
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { generateVirtualTryOn, suggestOutfit } from '@/lib/nanoBanana';
 import { supabase, getStoragePath, getPublicUrl, getAllUserPhotoPaths } from '@/lib/supabase';
 import { STORAGE_BUCKETS } from '@/utils/constants';
@@ -8,6 +8,32 @@ export const useNanoBanana = (userId: string | undefined) => {
   const [generating, setGenerating] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const setGeneratingSafe = (value: boolean) => {
+    if (isMountedRef.current) {
+      setGenerating(value);
+    }
+  };
+
+  const setSuggestingSafe = (value: boolean) => {
+    if (isMountedRef.current) {
+      setSuggesting(value);
+    }
+  };
+
+  const setErrorSafe = (value: string | null) => {
+    if (isMountedRef.current) {
+      setError(value);
+    }
+  };
 
   /**
    * Generate virtual try-on and save to storage
@@ -18,12 +44,12 @@ export const useNanoBanana = (userId: string | undefined) => {
     bottomImageUrl?: string
   ): Promise<{ url: string; persisted: boolean } | null> => {
     if (!userId) {
-      setError('User not authenticated');
+      setErrorSafe('User not authenticated');
       return null;
     }
 
-    setGenerating(true);
-    setError(null);
+    setGeneratingSafe(true);
+    setErrorSafe(null);
 
     try {
       // Call Nano Banana API
@@ -101,10 +127,10 @@ export const useNanoBanana = (userId: string | undefined) => {
       return { url: publicUrl, persisted: true };
     } catch (err: any) {
       console.error('Generate try-on error:', err);
-      setError(err.message || 'Failed to generate try-on');
+      setErrorSafe(err.message || 'Failed to generate try-on');
       return null;
     } finally {
-      setGenerating(false);
+      setGeneratingSafe(false);
     }
   };
 
@@ -119,8 +145,8 @@ export const useNanoBanana = (userId: string | undefined) => {
       bottoms: Array<{ id: string; tags: string[] }>;
     }
   ): Promise<{ topId: string; bottomId: string; reasoning?: string }> => {
-    setSuggesting(true);
-    setError(null);
+    setSuggestingSafe(true);
+    setErrorSafe(null);
 
     try {
       const result = await suggestOutfit(prompt, availableTags, availableItems);
@@ -131,10 +157,10 @@ export const useNanoBanana = (userId: string | undefined) => {
       };
     } catch (err: any) {
       console.error('Get suggestion error:', err);
-      setError(err.message || 'Failed to get suggestion');
+      setErrorSafe(err.message || 'Failed to get suggestion');
       throw err;
     } finally {
-      setSuggesting(false);
+      setSuggestingSafe(false);
     }
   };
 

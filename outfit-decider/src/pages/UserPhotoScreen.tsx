@@ -1,6 +1,6 @@
 // User photo upload screen
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import SemiCircleNav from '@/components/shared/SemiCircleNav';
 import RatingModal from '@/components/shared/RatingModal';
@@ -13,6 +13,13 @@ import './UserPhotoScreen.css';
 const UserPhotoScreen: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  type UserPhotoLocationState = {
+    pendingGeneration?: boolean;
+  } | null;
+  const pendingGenerationFromState = Boolean(
+    (location.state as UserPhotoLocationState)?.pendingGeneration
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -24,7 +31,9 @@ const UserPhotoScreen: React.FC = () => {
   const [hasOriginalBackup, setHasOriginalBackup] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [showDeleteButton, setShowDeleteButton] = useState(false);
+  const [awaitingGeneration, setAwaitingGeneration] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const generationPollRef = useRef<number | null>(null);
 
   const refreshGenerationState = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -39,10 +48,71 @@ const UserPhotoScreen: React.FC = () => {
     setHasOriginalBackup(Boolean(backupData));
   }, []);
 
+  const clearGenerationPoll = useCallback(() => {
+    if (generationPollRef.current !== null) {
+      window.clearInterval(generationPollRef.current);
+      generationPollRef.current = null;
+    }
+  }, []);
+
+  const startGenerationPoll = useCallback(() => {
+    if (typeof window === 'undefined' || generationPollRef.current !== null) {
+      return;
+    }
+
+    setAwaitingGeneration(true);
+
+    generationPollRef.current = window.setInterval(() => {
+      const generatedUrl = sessionStorage.getItem('lastGeneratedImageUrl');
+      const pendingFlag = sessionStorage.getItem('generationPending') === 'true';
+      const storedError = sessionStorage.getItem('generationError');
+
+      if (generatedUrl) {
+        setPhotoUrl(generatedUrl);
+        setPreviewUrl(generatedUrl);
+        refreshGenerationState();
+        sessionStorage.removeItem('generationPending');
+        sessionStorage.removeItem('generationError');
+        clearGenerationPoll();
+        setAwaitingGeneration(false);
+      } else if (!pendingFlag) {
+        if (storedError) {
+          setError(storedError);
+          sessionStorage.removeItem('generationError');
+        }
+        sessionStorage.removeItem('generationPending');
+        clearGenerationPoll();
+        setAwaitingGeneration(false);
+      }
+    }, 1200);
+  }, [clearGenerationPoll, refreshGenerationState]);
+
   useEffect(() => {
     loadUserPhoto();
     refreshGenerationState();
   }, [user, refreshGenerationState]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const pendingFlag = sessionStorage.getItem('generationPending') === 'true';
+    if (pendingFlag || pendingGenerationFromState) {
+      startGenerationPoll();
+      if (pendingGenerationFromState) {
+        navigate(
+          { pathname: location.pathname, search: location.search },
+          { replace: true }
+        );
+      }
+    }
+  }, [location.pathname, location.search, navigate, pendingGenerationFromState, startGenerationPoll]);
+
+  useEffect(() => {
+    return () => {
+      clearGenerationPoll();
+    };
+  }, [clearGenerationPoll]);
 
   const loadUserPhoto = async () => {
     if (!user) return;
@@ -530,7 +600,7 @@ const UserPhotoScreen: React.FC = () => {
               <button
                 type="button"
                 onClick={handleSaveRatingClick}
-                disabled={!hasGeneratedTryOn || uploading}
+                disabled={!hasGeneratedTryOn || uploading || awaitingGeneration}
                 className="button photo-action-button save-rating-button"
                 title={!hasGeneratedTryOn ? 'Generate an outfit before saving' : undefined}
               >
@@ -542,7 +612,7 @@ const UserPhotoScreen: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetGenerated}
-                disabled={!hasGeneratedTryOn || !hasOriginalBackup || uploading}
+                disabled={!hasGeneratedTryOn || !hasOriginalBackup || uploading || awaitingGeneration}
                 className="button photo-action-button reset-button"
                 title={!hasGeneratedTryOn ? 'No generated outfit to reset' : undefined}
               >
@@ -558,10 +628,31 @@ const UserPhotoScreen: React.FC = () => {
           </div>
         )}
 
-        {uploading && (
-          <div className="uploading-overlay">
-            <div className="loading-spinner" />
-            <p>Uploading...</p>
+        {(uploading || awaitingGeneration) && (
+          <div className="uploading-overlay" role="alert" aria-live="assertive">
+            <div className="window xp-loading-window">
+              <div className="title-bar xp-loading-title">
+                <div className="title-bar-text">
+                  {uploading ? 'Uploading Photo' : 'Generating Outfit'}
+                </div>
+              </div>
+              <div className="window-body xp-loading-body">
+                <div className="xp-loading-icon" aria-hidden="true" />
+                <p className="xp-loading-text">
+                  {uploading
+                    ? 'Packing your photo into the wardrobe...'
+                    : 'Painting your outfit. This may take a few seconds.'}
+                </p>
+                <div
+                  className="xp-progress-track"
+                  role="progressbar"
+                  aria-label="In progress"
+                  aria-busy="true"
+                >
+                  <div className="xp-progress-fill" />
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
