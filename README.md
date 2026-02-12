@@ -1,87 +1,106 @@
 # Outfit Decider
 
-Outfit Decider is a full-stack virtual wardrobe assistant built with React 19, Vite, and Supabase. It lets you catalogue tops and bottoms, generate AI-assisted try-on photos, and curate the outfits you love.
+## 1) What it is
+Outfit Decider is a full-stack web app that helps users manage a small digital wardrobe and preview outfit combinations with AI-generated try-on images.  
+It combines a React frontend, Supabase (auth + database + storage), and an Express proxy that calls Google Gemini models.
 
-## Implemented Features
+## 2) Demo
+Working on deploying.
 
-- **Supabase authentication & guarded routing** - `src/contexts/AuthContext.tsx` manages email/password sign up, login, logout, and persists session/onboarding metadata. `src/App.tsx` protects all wardrobe routes and collapses back to `/auth` while the session is loading.
-- **Wardrobe carousel & state persistence** - `src/pages/WardrobeScreen.tsx` loads the logged-in user's tops and bottoms from the `clothing_items` table, provides navigation arrows and random selection, and saves the last viewed combination to the `user_preferences` table so the selection survives reloads.
-- **AI virtual try-on** - the Wardrobe screen calls `useNanoBanana` to hit the backend `/api/nano-banana/generate` endpoint. The generated image is persisted back into the `user_photos` bucket/table, `sessionStorage` caches the last result, and the original photo is backed up so it can be restored later.
-- **User photo management** - `src/pages/UserPhotoScreen.tsx` lets users upload a base photo, double-click to reveal delete controls, reset to the original after trying on outfits, and save generated looks with an optional rating. Successful saves insert into `saved_outfits` and `generated_photos`.
-- **Clothing upload & tagging** - `src/pages/UploadScreen.tsx` validates and compresses photos, uploads them to the `clothing-items` bucket, and collects free-form tags through the `TagInput` modal to help with filtering.
-- **Storage browser & tag filters** - `src/pages/StorageScreen.tsx` shows every saved garment with a polaroid card, supports multi-tag filtering via `FilterTags`, and lets users delete items (removing both the storage object and the database record).
-- **Saved outfit gallery** - `src/pages/SavedOutfitsScreen.tsx` lists saved outfits, renders rating stars, and opens an image gallery with arrow navigation when multiple generated photos are available. Users can delete an outfit along with the associated generated photos.
-- **Shared navigation & controls** - reusable components such as `FileMenu`, `SemiCircleNav`, `ActionButtons`, `NavigationArrows`, and the `WiredButton` wrapper give the app its look-and-feel and connect the different screens.
-- **Image utilities & storage helpers** - `src/lib/imageUtils.ts` wraps `browser-image-compression` for consistent file validation/compression, while `src/lib/supabase.ts` centralises client creation and path helpers for Supabase Storage buckets.
+For now, run it locally using the commands in section 7.
 
-## Backend Service
+Current gaps:
+- No public hosted demo yet.
+- No automated tests in the repository yet (good next step: add Vitest/React Testing Library for frontend flows and API tests for `backend/server.js`).
 
-- Located at `backend/server.js`, an Express proxy exposes:
-  - `POST /api/nano-banana/generate` - proxies Google Gemini image generation to produce virtual try-on images.
-  - `POST /api/nano-banana/suggest` - asks Gemini Flash for JSON outfit suggestions (ready for when the Wardrobe "Describe" flow is completed).
-- Uses `@google/generative-ai` with the models configured in `backend/.env`.
-- Normalises image URLs (removing cache-busting query params), converts them to base64, and emits data URLs that the frontend can display instantly.
+## 3) Features
+- Email/password auth with Supabase and protected routes (`/`, `/upload/:type`, `/storage`, `/saved-outfits`, `/user-photo`).
+- Onboarding coachmark overlay (multi-step, skip/finish, persisted via user metadata + `sessionStorage`).
+- Upload top or bottom images with file validation (JPEG/PNG, size limit) and client-side compression before storage.
+- Tag clothing items during upload, then browse all items in Storage with multi-tag filtering.
+- Delete clothing items from both Supabase storage and `clothing_items` table.
+- Wardrobe carousel for tops/bottoms with previous/next and random selection.
+- Persist last viewed top/bottom selection per user in `user_preferences`.
+- Upload, replace, and delete user photo on the User Photo screen.
+- AI virtual try-on generation via backend `/api/nano-banana/generate`; generated result is saved back as current user photo.
+- "Describe outfit" modal that calls `/api/nano-banana/suggest` and applies suggested top/bottom IDs to the current selection.
+- Save generated looks with optional 1-5 star rating into `saved_outfits` and `generated_photos`.
+- Saved outfits gallery with photo navigation and delete action.
+- XP-style UI theme (`xp.css`) across screens and modals.
 
-## Data Model & Storage
+## 4) Why I built this
+I wanted to build a practical full-stack project that mixes CRUD workflows with an AI-assisted user flow.  
+Fashion/wardrobe management was a good domain because it needs real app behavior: auth, storage, relational data, async state, and UX decisions around image handling.
 
-Supabase schema expectations:
+## 5) What I learned
+- How to coordinate React route transitions with long-running async work using `sessionStorage` flags and polling.
+- How to integrate Supabase auth, storage buckets, and relational tables in one user flow.
+- How to handle generated images in multiple formats (public URL and data URL) and persist them safely.
+- How to build a backend proxy for Gemini image/text generation instead of exposing model calls directly in the client.
+- How to implement guided onboarding with dynamic DOM targeting and portal-based overlays.
 
-- `clothing_items`: `id (uuid)`, `user_id`, `type ('top' | 'bottom')`, `image_url`, `tags (text[])`, timestamps.
-- `user_preferences`: remembers `last_viewed_top_id` and `last_viewed_bottom_id` per user.
-- `user_photos`: stores the latest user photo URL (`user_id` is the primary key).
-- `saved_outfits`: `id`, `user_id`, optional `top_id` / `bottom_id`, optional numeric `rating`.
-- `generated_photos`: stores every generated try-on image linked to a `saved_outfits.id`.
+## 6) Tech stack
+- React 19 + TypeScript: component-based UI with typed app/data contracts.
+- Vite 7: fast frontend build and dev server.
+- React Router: route-based screen architecture and auth-guarded pages.
+- Supabase (`@supabase/supabase-js`): authentication, Postgres tables, and object storage.
+- Express + CORS + dotenv: lightweight backend API proxy with environment-based config.
+- Google Generative AI SDK (`@google/generative-ai`): model calls for try-on image generation and outfit suggestions.
+- `browser-image-compression`: client-side image size reduction before upload.
+- `xp.css` + custom CSS: retro Windows XP visual style.
 
-Storage buckets expected by the frontend (`src/utils/constants.ts`):
+## 7) How to run locally
+```bash
+# Prereq: Node.js 22 recommended (Vite 7 requires Node >= 20.19)
 
-- `clothing-items`
-- `user-photos`
-- `generated-photos`
+# 1) Frontend env file (create/edit)
+# file: outfit-decider/.env.local
+# required:
+# VITE_SUPABASE_URL=...
+# VITE_SUPABASE_ANON_KEY=...
+# VITE_NANO_BANANA_BASE_URL=http://localhost:3000/api/nano-banana
+# optional:
+# VITE_NANO_BANANA_API_KEY=...
 
-The browser keeps a lightweight cache in `sessionStorage` (`lastGeneratedImageUrl`, `lastGeneratedOutfit`, `originalUserPhotoData`, `originalUserPhotoSource`) to support resets and rating flows.
+# 2) Backend env file (create/edit)
+# file: outfit-decider/backend/.env
+# required:
+# GEMINI_API_KEY=...
+# optional:
+# PORT=3000
+# GEMINI_IMAGE_MODEL=gemini-2.5-flash-image
+# GEMINI_TEXT_MODEL=gemini-2.5-flash
 
-## Project Structure
+# 3) Install dependencies
+cd outfit-decider
+npm install
+cd backend
+npm install
 
-- `src/pages/` - High-level screens (auth, wardrobe, uploads, storage, saved outfits, user photo).
-- `src/components/` - Reusable UI pieces (wardrobe UI, storage cards, shared modals/buttons).
-- `src/contexts/` - Supabase auth context.
-- `src/hooks/` - Nano Banana / Gemini integration hook.
-- `src/lib/` - Supabase client, AI helpers, image utilities.
-- `src/types/` - Shared TypeScript models.
-- `src/utils/` - App-wide constants.
-- `backend/server.js` - Express proxy for Google Gemini.
+# 4) Start backend (terminal A)
+npm run start
 
+# 5) Start frontend (terminal B)
+cd ..
+npm run dev -- --host 127.0.0.1 --port 5173
+```
 
-## Running the App Locally
-
-1. Install dependencies:
-   ```bash
-   cd outfit-decider
-   npm install
-   cd backend
-   npm install
-   ```
-2. Start the backend (requires Node.js >= 18 for global `fetch`):
-   ```bash
-   npm run start
-   ```
-3. In a new terminal, start the frontend:
-   ```bash
-   cd outfit-decider
-   npm run dev
-   ```
-4. Visit the Vite dev server URL shown in the terminal.
-
-## Available Scripts
-
-- `npm run dev` - start the Vite dev server.
-- `npm run build` - type-check and build the frontend.
-- `npm run preview` - serve the production build.
-- `npm run lint` - run ESLint with the configured TypeScript rules.
-- `npm run start` (backend) - start the Express proxy.
-- `npm run dev` (backend) - start the proxy with `nodemon`.
-
-## Current Limitations
-
-- The Wardrobe "Describe" button is wired up in the UI but still shows a "coming soon" alert; the backend `/suggest` endpoint and `useNanoBanana.getSuggestion` are ready for when the storefront logic is added.
-- Supabase buckets/tables must exist before uploading items or photos; the project does not create them automatically.
+## 8) Project structure
+```text
+.
+├─ README.md
+└─ outfit-decider/
+   ├─ backend/
+   │  ├─ server.js                # Express proxy for Gemini endpoints
+   │  └─ package.json
+   ├─ src/
+   │  ├─ components/              # UI components (wardrobe, storage, shared, onboarding)
+   │  ├─ contexts/                # Auth + onboarding providers
+   │  ├─ hooks/                   # useNanoBanana hook
+   │  ├─ lib/                     # Supabase client, API helpers, image utilities
+   │  ├─ pages/                   # Auth, Wardrobe, Upload, Storage, User Photo, Saved Outfits
+   │  ├─ types/                   # TypeScript interfaces/models
+   │  └─ utils/                   # Constants
+   ├─ package.json
+   └─ vite.config.ts
+```

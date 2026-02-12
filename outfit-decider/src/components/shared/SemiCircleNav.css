@@ -54,18 +54,6 @@
   border-color: rgba(9, 36, 106, 0.2);
 }
 
-.semi-circle-nav:hover {
-  transform: translateX(var(--hover-shift, 0));
-}
-
-.semi-circle-left:hover {
-  --hover-shift: 2px;
-}
-
-.semi-circle-right:hover {
-  --hover-shift: -2px;
-}
-
 .semi-circle-nav:active::before {
   background: linear-gradient(180deg, #c8daff 0%, #a4bfff 100%);
 }
