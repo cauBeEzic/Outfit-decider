@@ -1,8 +1,8 @@
 # Outfit Decider
 
 ## 1) What it is
-Outfit Decider is a full-stack web app that helps users manage a small digital wardrobe and preview outfit combinations with AI-generated try-on images.  
-It combines a React frontend, Supabase (auth + database + storage), and an Express proxy that calls Google Gemini models.
+Outfit Decider is a full-stack web app that helps users manage a small digital wardrobe and preview outfit combinations with AI-generated outfit images.  
+It combines a React frontend, Supabase (auth + database + storage), and an Express proxy that calls Google Gemini Nano-Banana 2.5 model.
 
 ## 2) Demo
 Working on deploying.
@@ -14,7 +14,7 @@ Current gaps:
 - No automated tests in the repository yet (good next step: add Vitest/React Testing Library for frontend flows and API tests for `backend/server.js`).
 
 ## 3) Features
-- Email/password auth with Supabase and protected routes (`/`, `/upload/:type`, `/storage`, `/saved-outfits`, `/user-photo`).
+- Email/password auth with Supabase and auth-gated routes in the client (`/`, `/upload/:type`, `/storage`, `/saved-outfits`, `/user-photo`).
 - Onboarding coachmark overlay (multi-step, skip/finish, persisted via user metadata + `sessionStorage`).
 - Upload top or bottom images with file validation (JPEG/PNG, size limit) and client-side compression before storage.
 - Tag clothing items during upload, then browse all items in Storage with multi-tag filtering.
@@ -22,7 +22,7 @@ Current gaps:
 - Wardrobe carousel for tops/bottoms with previous/next and random selection.
 - Persist last viewed top/bottom selection per user in `user_preferences`.
 - Upload, replace, and delete user photo on the User Photo screen.
-- AI virtual try-on generation via backend `/api/nano-banana/generate`; generated result is saved back as current user photo.
+- AI-generated outfit image generation via backend `/api/nano-banana/generate`; generated result is saved back as current user photo.
 - "Describe outfit" modal that calls `/api/nano-banana/suggest` and applies suggested top/bottom IDs to the current selection.
 - Save generated looks with optional 1-5 star rating into `saved_outfits` and `generated_photos`.
 - Saved outfits gallery with photo navigation and delete action.
@@ -35,7 +35,7 @@ Fashion/wardrobe management was a good domain because it needs real app behavior
 ## 5) What I learned
 - How to coordinate React route transitions with long-running async work using `sessionStorage` flags and polling.
 - How to integrate Supabase auth, storage buckets, and relational tables in one user flow.
-- How to handle generated images in multiple formats (public URL and data URL) and persist them safely.
+- How to handle generated images in multiple formats (public URL and data URL) and store and display them in the UI.
 - How to build a backend proxy for Gemini image/text generation instead of exposing model calls directly in the client.
 - How to implement guided onboarding with dynamic DOM targeting and portal-based overlays.
 
